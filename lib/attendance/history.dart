@@ -14,7 +14,7 @@ import 'package:new_unikl_link/types/attendance/entry.dart';
 class AttendanceHistoryPage extends StatefulWidget {
   final Future<SharedPreferences> storeFuture;
 
-  AttendanceHistoryPage({Key? key, required this.storeFuture})
+  const AttendanceHistoryPage({Key? key, required this.storeFuture})
       : super(key: key);
 
   @override
