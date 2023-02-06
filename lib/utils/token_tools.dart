@@ -6,7 +6,7 @@ import 'package:new_unikl_link/server/urls.dart';
 import 'package:new_unikl_link/types/auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-DateFormat expiryFormat = DateFormat("dMyyyy-Hm");
+DateFormat expiryFormat = DateFormat("dd MM yyyy - HH mm", "en-US");
 
 Future<TokenStatus> checkToken({Future<SharedPreferences>? storeFuture}) {
   Completer<TokenStatus> c = Completer<TokenStatus>();
@@ -17,7 +17,8 @@ Future<TokenStatus> checkToken({Future<SharedPreferences>? storeFuture}) {
   storeFuture.then((store) {
     if (store.containsKey("tokenExpiry")) {
       DateTime currentTime = DateTime.now();
-      DateTime expiryTime = expiryFormat.parse(store.getString("tokenExpiry")!);
+      DateTime expiryTime =
+          expiryFormat.parseStrict(store.getString("tokenExpiry")!);
 
       if (currentTime.isBefore(expiryTime)) {
         tokenExpired = false;
