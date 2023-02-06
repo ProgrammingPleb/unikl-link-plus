@@ -62,8 +62,9 @@ Future<UpdateData> checkUpdates() {
       Map<String, dynamic> versionData = jsonDecode(resp.body);
       UpdateData updateData = UpdateData(appInfo.version, versionData);
       if (!updateData.isLatest) {
-        getApplicationDocumentsDirectory().then((directory) {
-          File updateFile = File("$directory/${updateData.latestVersion}.apk");
+        getExternalStorageDirectory().then((directory) {
+          File updateFile = File("${directory!.path}/moe.pleb.unikllinkplus-"
+              "${updateData.latestVersion}.apk");
           updateFile.exists().then((exists) {
             if (exists) {
               updateData.isDownloaded = true;
@@ -85,11 +86,21 @@ Future<DownloadData> downloadUpdatePayload(UpdateData updateData) {
   Completer<DownloadData> c = Completer<DownloadData>();
   Dio dio = Dio();
 
-  getApplicationDocumentsDirectory().then((directory) {
-    dio.download(updateData.url, "$directory/${updateData.latestVersion}.apk",
-        deleteOnError: true);
-    c.complete(
-        DownloadData(true, "$directory/${updateData.latestVersion}.apk"));
+  getExternalStorageDirectory().then((directory) {
+    dio
+        .download(
+            updateData.url,
+            "${directory!.path}/moe.pleb.unikllinkplus-"
+            "${updateData.latestVersion}.apk",
+            deleteOnError: true)
+        .then((value) {
+      updateData.payloadFile = File("${directory.path}/moe.pleb.unikllinkplus-"
+          "${updateData.latestVersion}.apk");
+      c.complete(DownloadData(
+          true,
+          "${directory.path}/moe.pleb.unikllinkplus-"
+          "${updateData.latestVersion}.apk"));
+    });
   }).onError((error, stackTrace) {
     c.complete(DownloadData(false));
   });
