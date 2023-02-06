@@ -272,6 +272,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       onPressed: () {
                                         widget._store.then(
                                           (store) {
+                                            store.remove("tokenExpiry");
                                             store.remove("eCitieToken");
                                             store.remove("o365AccessToken");
                                             store.remove("o365RefreshToken");
