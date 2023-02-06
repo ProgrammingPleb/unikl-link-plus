@@ -53,6 +53,8 @@ Future<TokenStatus> checkToken({Future<SharedPreferences>? storeFuture}) {
           }
         });
       }
+    } else {
+      c.complete(TokenStatus.valid());
     }
   });
 
