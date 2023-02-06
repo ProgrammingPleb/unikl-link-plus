@@ -13,7 +13,7 @@ class SemesterWeek {
 
     name = normalizeText(data['SD_EVENT']);
     type = normalizeText(data['SD_EVENT_TYPE']);
-    if (type == "Semester Break") {
+    if (type == "Semester Break" || type == "Exam") {
       number = 1;
     } else {
       number = data['SD_WEEK'];

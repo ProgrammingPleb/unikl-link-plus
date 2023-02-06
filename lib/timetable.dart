@@ -26,6 +26,8 @@ class TimetablePage extends StatefulWidget {
 class _TimetableState extends State<TimetablePage> {
   bool _loading = true;
   bool _semBreak = false;
+  bool _finalExam = false;
+  String? _bannerText;
   List<Widget> timetableList = [];
   Widget currentView = const UnloadedData();
 
@@ -69,13 +71,16 @@ class _TimetableState extends State<TimetablePage> {
                   .then((resp) {
                 store.setString("timetable", resp.body);
                 store.setBool("semBreak", currentWeek.type == "Semester Break");
+                store.setBool("finalExam", currentWeek.type == "Exam");
                 _semBreak = currentWeek.type == "Semester Break";
+                _finalExam = currentWeek.type == "Exam";
                 c.complete(TimetableData(jsonDecode(resp.body)));
               });
             });
           });
         } else {
           _semBreak = store.getBool("semBreak")!;
+          _finalExam = store.getBool("finalExam")!;
           c.complete(TimetableData(jsonDecode(store.getString("timetable")!)));
         }
       });
@@ -125,11 +130,18 @@ class _TimetableState extends State<TimetablePage> {
         }
       }
 
+      if (_semBreak) {
+        _bannerText = "Currently on Semester Break";
+      }
+      if (_finalExam) {
+        _bannerText = "Currently on Final Examination Week";
+      }
+
       setState(() {
         _loading = false;
         currentView = LoadedData(
           timetableList: timetableList,
-          semBreak: _semBreak,
+          bannerText: _bannerText,
         );
       });
     });
@@ -187,12 +199,12 @@ class UnloadedData extends StatelessWidget {
 
 class LoadedData extends StatelessWidget {
   final List<Widget> timetableList;
-  final bool semBreak;
+  final String? bannerText;
 
   const LoadedData({
     Key? key,
     required this.timetableList,
-    required this.semBreak,
+    this.bannerText,
   }) : super(key: key);
 
   @override
@@ -204,7 +216,7 @@ class LoadedData extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (semBreak) ...[
+              if (bannerText != null) ...[
                 Padding(
                   padding: const EdgeInsets.only(bottom: 5),
                   child: Container(
@@ -231,15 +243,19 @@ class LoadedData extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    "Currently on Semester Break",
-                                    style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      height: 1.3,
+                                  FittedBox(
+                                    fit: BoxFit.fitWidth,
+                                    child: Text(
+                                      bannerText!,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        height: 1.3,
+                                      ),
                                     ),
                                   ),
                                 ],
