@@ -18,7 +18,7 @@ class UpdateData {
     url = newData["url"];
     isLatest = _compareVersions(oldVersion, newData["version"]);
 
-    if (isLatest) {
+    if (!isLatest) {
       latestVersion = newData["version"];
       changelog = newData["changelog"];
     } else {
