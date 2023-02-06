@@ -135,6 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
             setState(() {
               studentData = data!;
               name = data.normalizeName();
+              id = data.id;
             });
           });
         }
