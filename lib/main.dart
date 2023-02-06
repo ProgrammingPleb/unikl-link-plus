@@ -4,13 +4,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import 'package:new_unikl_link/types/auth.dart';
-import 'package:android_intent_plus/android_intent.dart';
-import 'package:new_unikl_link/utils/update/popup.dart';
 import 'package:new_unikl_link/utils/token_tools.dart';
 import 'package:new_unikl_link/utils/update/checker.dart';
-import 'package:new_unikl_link/utils/update/updater.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:new_unikl_link/attendance/history.dart';
 import 'package:new_unikl_link/login.dart';
@@ -89,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     initData();
     if (Platform.isAndroid) {
-      // mainCheckUpdates(context);
+      mainCheckUpdates(context);
     }
     super.initState();
   }
