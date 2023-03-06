@@ -94,6 +94,14 @@ class _MyHomePageState extends State<MyHomePage> {
       if (store.containsKey("timetable")) {
         store.remove("timetable");
       }
+      if (store.containsKey("profile")) {
+        studentData =
+              StudentData.fromJson(jsonDecode(store.getString("profile")!));
+          setState(() {
+            name = studentData.normalizeName();
+            id = studentData.id;
+          });
+      }
     });
 
     return checkToken(storeFuture: widget._store).then((status) {
