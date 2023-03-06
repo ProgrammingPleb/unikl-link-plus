@@ -2,7 +2,7 @@ String normalizeText(String text) {
   String tempName = "";
   text = text.replaceAll("_", " ");
   text.split(" ").forEach((element) {
-    if (["ASP.NET", "IT"].any((word) => element.contains(word))) {
+    if (["ASP.NET", "IT", "PHP"].any((word) => element.contains(word))) {
       tempName += "$element ";
     } else {
       String namePart = element.toLowerCase();
