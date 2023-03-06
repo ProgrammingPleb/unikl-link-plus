@@ -17,11 +17,15 @@ Future<TokenStatus> checkToken({Future<SharedPreferences>? storeFuture}) {
   storeFuture.then((store) {
     if (store.containsKey("tokenExpiry")) {
       DateTime currentTime = DateTime.now();
-      DateTime expiryTime =
-          expiryFormat.parseStrict(store.getString("tokenExpiry")!);
+      DateTime expiryTime;
+      try {
+        expiryTime = expiryFormat.parseStrict(store.getString("tokenExpiry")!);
 
-      if (currentTime.isBefore(expiryTime)) {
-        tokenExpired = false;
+        if (currentTime.isBefore(expiryTime)) {
+          tokenExpired = false;
+        }
+      } catch (e) {
+        tokenExpired = true;
       }
     }
 
