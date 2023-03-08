@@ -94,7 +94,7 @@ class TimetableEntryWithPhysical extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Level ${roomCode.split(roomCode.substring(2))[0]}",
+                            "Level ${getLevelFromRoomCode(roomCode)}",
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.onPrimary,
                               fontSize: 12,
@@ -124,5 +124,13 @@ class TimetableEntryWithPhysical extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+String getLevelFromRoomCode(String roomCode) {
+  if (roomCode.length == 3) {
+    return roomCode.substring(0, 1);
+  } else {
+    return roomCode.substring(0, 2);
   }
 }
