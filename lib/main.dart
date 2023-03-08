@@ -175,21 +175,26 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             Padding(
-                padding: const EdgeInsets.only(bottom: 30),
-                child: GestureDetector(
-                  onTap: () {
-                    Clipboard.setData(ClipboardData(text: id));
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text(
-                            "Your student ID has been copied to the clipboard!")));
-                  },
-                  child: Text(
-                    "Your ID number is: $id",
-                    style: const TextStyle(
-                      fontSize: 15,
+              padding: const EdgeInsets.only(bottom: 20),
+              child: GestureDetector(
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: id));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      behavior: SnackBarBehavior.floating,
+                      content: Text(
+                          "Your student ID has been copied to the clipboard!"),
                     ),
+                  );
+                },
+                child: Text(
+                  "Your ID number is: $id",
+                  style: const TextStyle(
+                    fontSize: 15,
                   ),
-                )),
+                ),
+              ),
+            ),
             Expanded(
               child: GridView.count(
                 crossAxisCount: 2,
