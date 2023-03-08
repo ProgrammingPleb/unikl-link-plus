@@ -30,6 +30,9 @@ Future<TokenStatus> checkToken({Future<SharedPreferences>? storeFuture}) {
     }
 
     if (tokenExpired) {
+      if (store.containsKey("timetable")) {
+        store.remove("timetable");
+      }
       if (!store.containsKey("eCitieToken")) {
         c.complete(TokenStatus.noKey());
       } else {
@@ -49,10 +52,12 @@ Future<TokenStatus> checkToken({Future<SharedPreferences>? storeFuture}) {
               } else {
                 AuthData auth = AuthData.fromJson(jsonDecode(resp.body));
                 store.setString("eCitieToken", auth.eCitieToken);
+                setTokenExpiry(storeFuture: storeFuture);
                 c.complete(TokenStatus.valid());
               }
             });
           } else {
+            setTokenExpiry(storeFuture: storeFuture);
             c.complete(TokenStatus.valid());
           }
         });
