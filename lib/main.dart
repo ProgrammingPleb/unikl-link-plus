@@ -260,6 +260,26 @@ class _MyHomePageState extends State<MyHomePage> {
                     padding: const EdgeInsets.symmetric(
                         vertical: 10, horizontal: 15),
                     child: FloatingActionButton.extended(
+                      heroTag: "Settings",
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            behavior: SnackBarBehavior.floating,
+                            content:
+                                Text("This action is not implemented yet!"),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.settings),
+                      label: Column(children: const [
+                        Text("Settings"),
+                      ]),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 15),
+                    child: FloatingActionButton.extended(
                       heroTag: "Logout",
                       onPressed: () {
                         showDialog(
