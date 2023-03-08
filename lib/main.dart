@@ -91,9 +91,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> initData() {
     widget._store.then((store) {
-      if (store.containsKey("timetable")) {
-        store.remove("timetable");
-      }
       if (store.containsKey("profile")) {
         studentData =
               StudentData.fromJson(jsonDecode(store.getString("profile")!));
