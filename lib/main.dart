@@ -4,6 +4,10 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:intl/intl.dart';
+import 'package:new_unikl_link/types/subject.dart';
+import 'package:new_unikl_link/utils/get_next_or_current_subject.dart';
 import 'package:new_unikl_link/utils/token_tools.dart';
 import 'package:new_unikl_link/utils/update/checker.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -78,6 +82,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String name = "Placeholder Name";
   String id = "Placeholder ID";
+  List<Widget> atAGlance = [];
   late StudentData studentData;
 
   @override
@@ -89,15 +94,43 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
+  Future<void> updateAtAGlance() {
+    return getNextOrCurrentSubject(widget._store).then(
+      (Subject subject) {
+        DateTime currentTime = DateTime.now();
+        String subjectLocation;
+        if (subject.online) {
+          subjectLocation = "which is **online**";
+        } else {
+          subjectLocation =
+              "at **room ${subject.roomCode}** (level ${subject.roomLevel})";
+        }
+        setState(() {
+          atAGlance = [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 30),
+              child: MarkdownBody(
+                  data: "Today is ${DateFormat.EEEE().format(currentTime)}, "
+                      "your next subject is **${subject.name}** "
+                      "(${subject.code}) $subjectLocation, and "
+                      "${subject.getFormattedDuration(true)}."),
+            ),
+          ];
+        });
+      },
+    );
+  }
+
   Future<void> initData() {
     widget._store.then((store) {
       if (store.containsKey("profile")) {
         studentData =
-              StudentData.fromJson(jsonDecode(store.getString("profile")!));
-          setState(() {
-            name = studentData.normalizeName();
-            id = studentData.id;
-          });
+            StudentData.fromJson(jsonDecode(store.getString("profile")!));
+        setState(() {
+          name = studentData.normalizeName();
+          id = studentData.id;
+        });
+        updateAtAGlance();
       }
     });
 
@@ -115,6 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ).then((data) {
+            updateAtAGlance();
             setState(() {
               studentData = data!;
               name = data.normalizeName();
@@ -132,6 +166,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ).then((data) {
+            updateAtAGlance();
             setState(() {
               studentData = data!;
               name = data.normalizeName();
@@ -143,6 +178,7 @@ class _MyHomePageState extends State<MyHomePage> {
         widget._store.then((store) {
           studentData =
               StudentData.fromJson(jsonDecode(store.getString("profile")!));
+          updateAtAGlance();
           setState(() {
             name = studentData.normalizeName();
             id = studentData.id;
@@ -157,7 +193,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(15, 40, 15, 20),
+        padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -195,6 +231,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
             ),
+            ...atAGlance,
             Expanded(
               child: GridView.count(
                 crossAxisCount: 2,
@@ -206,10 +243,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: FloatingActionButton.extended(
                       heroTag: "Timetable",
                       onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (builder) => TimetablePage(
-                                  storeFuture: widget._store,
-                                )));
+                        Navigator.of(context)
+                            .push(MaterialPageRoute(
+                                builder: (builder) => TimetablePage(
+                                      storeFuture: widget._store,
+                                    )))
+                            .then((value) => updateAtAGlance());
                       },
                       icon: const Icon(Icons.event_note),
                       label: Column(children: const [
@@ -223,10 +262,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: FloatingActionButton.extended(
                       heroTag: "AttHistory",
                       onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => AttendanceHistoryPage(
-                                  storeFuture: widget._store,
-                                )));
+                        Navigator.of(context)
+                            .push(MaterialPageRoute(
+                                builder: (context) => AttendanceHistoryPage(
+                                      storeFuture: widget._store,
+                                    )))
+                            .then((value) => updateAtAGlance());
                       },
                       icon: const Icon(Icons.date_range),
                       label: Column(children: const [
@@ -241,13 +282,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: FloatingActionButton.extended(
                       heroTag: "SelfAttend",
                       onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => SelfAttendancePage(
-                                  eCitieURL: widget.eCitieURL,
-                                  eCitieQ: widget.eCitieQ,
-                                  studentData: studentData,
-                                  storeFuture: widget._store,
-                                )));
+                        Navigator.of(context)
+                            .push(MaterialPageRoute(
+                                builder: (context) => SelfAttendancePage(
+                                      eCitieURL: widget.eCitieURL,
+                                      eCitieQ: widget.eCitieQ,
+                                      studentData: studentData,
+                                      storeFuture: widget._store,
+                                    )))
+                            .then((value) => updateAtAGlance());
                       },
                       icon: const Icon(Icons.qr_code_scanner),
                       label: Column(children: const [
