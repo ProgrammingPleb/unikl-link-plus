@@ -51,3 +51,6 @@ app.*.map.json
 
 # Sensitive server interface files
 /lib/server
+
+# Visual Studio Code preferences
+/.vscode
