@@ -1,15 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:new_unikl_link/components/timetable_entry_no_physical.dart';
 import 'package:new_unikl_link/components/timetable_entry_with_physical.dart';
 import 'package:new_unikl_link/server/query.dart';
 import 'package:new_unikl_link/server/urls.dart';
-import 'package:new_unikl_link/types/info/semester_week.dart';
-import 'package:new_unikl_link/types/info/student_profile.dart';
-import 'package:new_unikl_link/types/info/student_semester.dart';
 import 'package:new_unikl_link/types/timetable/data.dart';
+import 'package:new_unikl_link/utils/get_timetable_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TimetablePage extends StatefulWidget {
@@ -38,45 +35,10 @@ class _TimetableState extends State<TimetablePage> {
 
       widget.storeFuture.then((store) {
         if (!store.containsKey("timetable")) {
-          StudentData studentData =
-              StudentData.fromJson(jsonDecode(store.getString("profile")!));
-          http
-              .get(Uri.parse(widget.eCitieURL.serverQuery(
-                  store.getString("eCitieToken")!,
-                  widget.eCitieQ.semesterData.replaceAll(
-                      "|STUDENTID|", store.getString("personID")!))))
-              .then((resp) {
-            StudentSemesterData semesterData =
-                StudentSemesterData(jsonDecode(resp.body));
-            http
-                .get(Uri.parse(widget.eCitieURL.serverQuery(
-                    store.getString("eCitieToken")!,
-                    widget.eCitieQ.currentWeek
-                        .replaceFirst("|SEMCODE|", semesterData.latest.code)
-                        .replaceAll("|SEMSET|", semesterData.latest.set))))
-                .then((resp) {
-              Map<String, dynamic> weekData =
-                  Map<String, dynamic>.from(jsonDecode(resp.body)[0]);
-              SemesterWeek currentWeek = SemesterWeek(weekData);
-              http
-                  .get(Uri.parse(widget.eCitieURL.serverQuery(
-                      store.getString("eCitieToken")!,
-                      widget.eCitieQ.timetable
-                          .replaceFirst(
-                              "|STUDENTID|", store.getString("personID")!)
-                          .replaceFirst("|SEMCODE|", semesterData.latest.code)
-                          .replaceFirst("|BRANCHCODE|", studentData.branchCode)
-                          .replaceFirst(
-                              "|WEEK|", currentWeek.number.toString()))))
-                  .then((resp) {
-                store.setString("timetable", resp.body);
-                store.setBool("semBreak", currentWeek.type == "Semester Break");
-                store.setBool("finalExam", currentWeek.type == "Exam");
-                _semBreak = currentWeek.type == "Semester Break";
-                _finalExam = currentWeek.type == "Exam";
-                c.complete(TimetableData(jsonDecode(resp.body)));
-              });
-            });
+          getTimetableData(store).then((TimetableData timetable) {
+            _semBreak = store.getBool("semBreak")!;
+            _finalExam = store.getBool("finalExam")!;
+            c.complete(timetable);
           });
         } else {
           _semBreak = store.getBool("semBreak")!;
