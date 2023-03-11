@@ -127,15 +127,19 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  void updateUserDetails(String name, String id) {
+    setState(() {
+      this.name = name;
+      this.id = id;
+    });
+  }
+
   Future<void> initData() {
     widget._store.then((store) {
       if (store.containsKey("profile")) {
         studentData =
             StudentData.fromJson(jsonDecode(store.getString("profile")!));
-        setState(() {
-          name = studentData.normalizeName();
-          id = studentData.id;
-        });
+        updateUserDetails(studentData.normalizeName(), studentData.id);
         updateAtAGlance();
       }
     });
@@ -155,11 +159,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ).then((data) {
             updateAtAGlance();
-            setState(() {
-              studentData = data!;
-              name = data.normalizeName();
-              id = data.id;
-            });
+            studentData = data!;
+            updateUserDetails(data.normalizeName(), data.id);
           });
         } else {
           Navigator.push(
@@ -173,11 +174,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ).then((data) {
             updateAtAGlance();
-            setState(() {
-              studentData = data!;
-              name = data.normalizeName();
-              id = data.id;
-            });
+            studentData = data!;
+            updateUserDetails(data.normalizeName(), data.id);
           });
         }
       } else {
@@ -185,10 +183,7 @@ class _MyHomePageState extends State<MyHomePage> {
           studentData =
               StudentData.fromJson(jsonDecode(store.getString("profile")!));
           updateAtAGlance();
-          setState(() {
-            name = studentData.normalizeName();
-            id = studentData.id;
-          });
+          updateUserDetails(studentData.normalizeName(), studentData.id);
         });
       }
     });
