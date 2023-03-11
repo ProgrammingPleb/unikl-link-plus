@@ -21,6 +21,9 @@ class SelfAttendancePage extends StatelessWidget {
   final MobileScannerController controller = MobileScannerController(
     facing: CameraFacing.back,
     torchEnabled: false,
+    detectionTimeoutMs: 1000,
+    formats: [BarcodeFormat.qrCode],
+    detectionSpeed: DetectionSpeed.noDuplicates,
   );
 
   SelfAttendancePage({
@@ -67,6 +70,53 @@ class SelfAttendancePage extends StatelessWidget {
                       controller: controller,
                       fit: BoxFit.cover,
                       onDetect: ((capture) {
+                        if (capture.barcodes == [] ||
+                            capture.barcodes[0].rawValue == null) {
+                          ScaffoldMessenger.of(context).clearSnackBars();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  "Unable to scan the QR code, please try again!"),
+                            ),
+                          );
+                        } else {
+                          QRAttendanceData qr = QRAttendanceData.fromJson(
+                              jsonDecode(capture.barcodes[0].rawValue!));
+                          storeFuture.then((store) {
+                            http.post(
+                              Uri.parse(eCitieURL.selfAttendance(
+                                  qr.session,
+                                  qr.datetime,
+                                  store.getString("eCitieToken")!,
+                                  studentData.id)),
+                              headers: {
+                                "content-type":
+                                    "application/x-www-form-urlencoded"
+                              },
+                            ).then((resp) {
+                              QRAttendanceResponse qrResp =
+                                  QRAttendanceResponse.fromJson(
+                                      jsonDecode(resp.body));
+                              if (qrResp.status == "0") {
+                                Navigator.of(context)
+                                    .push(MaterialPageRoute(
+                                        builder: (context) => AttendanceFailed(
+                                              qrResp: qrResp,
+                                            )))
+                                    .then(
+                                        (value) => Navigator.of(context).pop());
+                              } else {
+                                Navigator.of(context)
+                                    .push(MaterialPageRoute(
+                                        builder: (context) => AttendanceSuccess(
+                                              qrResp: qrResp,
+                                            )))
+                                    .then(
+                                        (value) => Navigator.of(context).pop());
+                              }
+                            });
+                          });
+                        }
                       }),
                     ),
                   ),
