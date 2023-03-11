@@ -8,6 +8,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:intl/intl.dart';
 import 'package:new_unikl_link/pages/settings.dart';
 import 'package:new_unikl_link/types/settings/data.dart';
+import 'package:new_unikl_link/types/settings/reload_data.dart';
 import 'package:new_unikl_link/types/subject.dart';
 import 'package:new_unikl_link/utils/get_next_or_current_subject.dart';
 import 'package:new_unikl_link/utils/token_tools.dart';
@@ -335,12 +336,23 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                       heroTag: "Settings",
                       onPressed: () {
                         Navigator.of(context)
-                            .push(MaterialPageRoute(
+                            .push(MaterialPageRoute<ReloadData>(
                                 builder: (context) => SettingsPage(
                                       storeFuture: widget._store,
                                       settingsData: settingsData,
                                     )))
-                            .then((value) => updateAtAGlance());
+                            .then((update) {
+                          if (update != null) {
+                            if (update.studentProfile) {
+                              studentData = update.studentData!;
+                              updateUserDetails(update.studentData!.name,
+                                  update.studentData!.name);
+                            }
+                            if (update.atAGlance) {
+                              updateAtAGlance();
+                            }
+                          }
+                        });
                       },
                       icon: const Icon(Icons.settings),
                       label: Column(children: const [

@@ -8,7 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 DateFormat expiryFormat = DateFormat("dd MM yyyy - HH mm", "en-US");
 
-Future<TokenStatus> checkToken({Future<SharedPreferences>? storeFuture}) {
+Future<TokenStatus> checkToken(
+    {Future<SharedPreferences>? storeFuture, bool resetCache = false}) {
   Completer<TokenStatus> c = Completer<TokenStatus>();
   storeFuture ??= SharedPreferences.getInstance();
   ECitieURLs eCitieURL = ECitieURLs();
@@ -29,7 +30,7 @@ Future<TokenStatus> checkToken({Future<SharedPreferences>? storeFuture}) {
       }
     }
 
-    if (tokenExpired) {
+    if (tokenExpired || resetCache) {
       if (store.containsKey("timetable")) {
         store.remove("timetable");
       }
