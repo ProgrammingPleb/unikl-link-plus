@@ -99,10 +99,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
-    initData();
-    if (Platform.isAndroid) {
-      mainCheckUpdates(context);
-    }
+    initData().then(
+      (value) {
+        if (Platform.isAndroid) {
+          mainCheckUpdates(context, settingsData);
+        }
+      },
+    );
+
     super.initState();
   }
 

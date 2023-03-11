@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:new_unikl_link/types/settings/data.dart';
 import 'package:new_unikl_link/utils/update/version_data.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -18,12 +19,11 @@ class UpdateData {
   File? payloadFile;
 
   UpdateData(String oldVersion, VersionData newData, String? appBranch) {
-    isLatest = _checkIfLatestVersion(oldVersion, newData);
-
     if (appBranch != null) {
       this.appBranch = appBranch;
     }
 
+    isLatest = _checkIfLatestVersion(oldVersion, newData);
     if (!isLatest) {
       latestVersion = newData.getLatestVersion(this.appBranch);
       changelog = newData.getLatestChangelog(this.appBranch);
@@ -109,7 +109,7 @@ class DownloadData {
   DownloadData(this.success, [this.filePath]);
 }
 
-Future<UpdateData> checkUpdates() {
+Future<UpdateData> checkUpdates(SettingsData settings) {
   Completer<UpdateData> c = Completer();
   Future<PackageInfo> packageInfo = PackageInfo.fromPlatform();
   Future<SharedPreferences> storeFuture = SharedPreferences.getInstance();
@@ -120,8 +120,8 @@ Future<UpdateData> checkUpdates() {
           .get(Uri.parse("https://pleb.moe/UniKLLinkPlus/version-v2.json"))
           .then((resp) {
         VersionData versionData = VersionData(resp.body);
-        UpdateData updateData = UpdateData(
-            appInfo.version, versionData, store.getString("appBranch"));
+        UpdateData updateData =
+            UpdateData(appInfo.version, versionData, settings.appBranch);
         if (!updateData.isLatest) {
           getExternalStorageDirectory().then((directory) {
             File updateFile = File("${directory!.path}/moe.pleb.unikllinkplus-"

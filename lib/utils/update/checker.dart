@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_installer/flutter_app_installer.dart';
+import 'package:new_unikl_link/types/settings/data.dart';
 import 'package:new_unikl_link/utils/update/popup.dart';
 import 'package:new_unikl_link/utils/update/updater.dart';
 
-Future<void> mainCheckUpdates(BuildContext context) {
+Future<void> mainCheckUpdates(BuildContext context, SettingsData settings) {
   Completer<void> c = Completer();
 
-  checkUpdates().then((updateData) {
+  checkUpdates(settings).then((updateData) {
     if (!updateData.isLatest) {
       if (updateData.isDownloaded) {
         updateSnackBar(context, updateData);

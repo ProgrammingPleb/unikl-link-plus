@@ -7,9 +7,9 @@ class VersionData {
 
   VersionData(String versionResponse) {
     Map<String, dynamic> versionData = jsonDecode(versionResponse);
-    stable = Version(jsonDecode(versionData["stable"]));
-    dev = Version(jsonDecode(versionData["dev"]));
-    canary = Version(jsonDecode(versionData["canary"]));
+    stable = Version(versionData["stable"]);
+    dev = Version(versionData["dev"]);
+    canary = Version(versionData["canary"]);
   }
 
   String getLatestVersion(String branch) {
@@ -57,7 +57,7 @@ class Version {
   late final String url;
   late final String changelog;
 
-  Version(Map<String, String> data) {
+  Version(Map<String, dynamic> data) {
     version = data["version"]!;
     url = data["url"]!;
     changelog = data["changelog"]!;
