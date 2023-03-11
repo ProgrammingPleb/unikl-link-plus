@@ -244,6 +244,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             ...atAGlance,
             Expanded(
               child: GridView.count(
+                physics: const NeverScrollableScrollPhysics(),
                 crossAxisCount: 2,
                 childAspectRatio: 1.77,
                 children: [
