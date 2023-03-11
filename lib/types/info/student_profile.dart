@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:new_unikl_link/utils/normalize.dart' as normalize;
 
 class StudentData {
   final String id;
@@ -80,15 +81,6 @@ class StudentData {
   }
 
   String normalizeName() {
-    String tempName = "";
-    name.split(" ").forEach((element) {
-      String namePart = element.toLowerCase();
-      if (namePart != "bin" && namePart != "binti") {
-        tempName += "${namePart[0].toUpperCase()}${namePart.substring(1)} ";
-      } else {
-        tempName += "$namePart ";
-      }
-    });
-    return tempName.trim();
+    return normalize.normalizeName(name);
   }
 }

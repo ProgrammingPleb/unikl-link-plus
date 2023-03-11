@@ -1,3 +1,5 @@
+import 'package:new_unikl_link/utils/normalize.dart';
+
 class QRSessionInfo {
   late final String staffName;
   late final String subjectName;
@@ -8,8 +10,8 @@ class QRSessionInfo {
     required subjectName,
     required this.group,
   }) {
-    this.staffName = normalizeString(staffName);
-    this.subjectName = normalizeString(subjectName);
+    this.staffName = normalizeName(staffName);
+    this.subjectName = normalizeText(subjectName);
   }
 
   factory QRSessionInfo.fromJson(Map<String, dynamic> json) {
@@ -18,18 +20,5 @@ class QRSessionInfo {
       subjectName: json['SM_DESC'],
       group: json['SAM_GROUP'],
     );
-  }
-
-  String normalizeString(String text) {
-    String tempName = "";
-    text.split(" ").forEach((element) {
-      String namePart = element.toLowerCase();
-      if (namePart != "bin" && namePart != "binti") {
-        tempName += "${namePart[0].toUpperCase()}${namePart.substring(1)} ";
-      } else {
-        tempName += "$namePart ";
-      }
-    });
-    return tempName.trim();
   }
 }

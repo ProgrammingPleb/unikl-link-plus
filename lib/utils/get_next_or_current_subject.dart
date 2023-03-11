@@ -7,6 +7,7 @@ import 'package:new_unikl_link/types/timetable/data.dart';
 import 'package:new_unikl_link/types/timetable/day.dart';
 import 'package:new_unikl_link/types/timetable/entry.dart';
 import 'package:new_unikl_link/utils/get_timetable_data.dart';
+import 'package:new_unikl_link/utils/normalize.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<Subject> getNextOrCurrentSubject(Future<SharedPreferences> storeFuture) {
@@ -63,17 +64,4 @@ Future<Subject> getNextOrCurrentSubject(Future<SharedPreferences> storeFuture) {
   });
 
   return c.future;
-}
-
-DateTime normalizeTime(String timeString, DateTime checkedTime) {
-  DateFormat subjectTimeFormat = DateFormat("hh:mma");
-
-  DateTime time = subjectTimeFormat.parse(timeString);
-  return DateTime(
-    checkedTime.year,
-    checkedTime.month,
-    checkedTime.day,
-    time.hour,
-    time.minute,
-  );
 }

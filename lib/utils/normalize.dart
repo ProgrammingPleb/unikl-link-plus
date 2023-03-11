@@ -1,12 +1,14 @@
+import 'package:intl/intl.dart';
+
 String normalizeText(String text) {
   String tempName = "";
   text = text.replaceAll("_", " ");
   text.split(" ").forEach((element) {
-    if (["ASP.NET", "IT", "PHP"].any((word) => element.contains(word))) {
+    if (_keepAllCaps.any((word) => element.contains(word))) {
       tempName += "$element ";
     } else {
       String namePart = element.toLowerCase();
-      if (!(_nonCapitalized + ["di"]).any((word) => namePart == word)) {
+      if (!(_nonCapitalized).any((word) => namePart == word)) {
         tempName += "${namePart[0].toUpperCase()}${namePart.substring(1)} ";
       } else {
         tempName += "$namePart ";
@@ -16,14 +18,49 @@ String normalizeText(String text) {
   return tempName.trim();
 }
 
+String normalizeName(String name) {
+  String tempName = "";
+  name.split(" ").forEach((element) {
+    String namePart = element.toLowerCase();
+    if (namePart != "bin" && namePart != "binti") {
+      tempName += "${namePart[0].toUpperCase()}${namePart.substring(1)} ";
+    } else {
+      tempName += "$namePart ";
+    }
+  });
+  return tempName.trim();
+}
+
+DateTime normalizeTime(String timeString, DateTime checkedTime) {
+  DateFormat subjectTimeFormat = DateFormat("hh:mma");
+
+  DateTime time = subjectTimeFormat.parse(timeString);
+  return DateTime(
+    checkedTime.year,
+    checkedTime.month,
+    checkedTime.day,
+    time.hour,
+    time.minute,
+  );
+}
+
+List<String> _keepAllCaps = [
+  'ASP.NET',
+  'IT',
+  'PHP',
+];
+
 List<String> _nonCapitalized = [
   'a',
   'an',
   'and',
   'as',
   'at',
+  'bin',
+  'binti',
   'but',
   'by',
+  'di',
   'en',
   'for',
   'from',
