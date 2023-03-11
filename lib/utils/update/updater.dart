@@ -35,11 +35,16 @@ class UpdateData {
 
   bool _checkIfLatestVersion(String sOldVersion, VersionData vNewVersion) {
     bool stableBuild = true;
+    bool hotfixBuild;
     bool devBuild;
     bool canaryBuild;
     String cOldVersion = sOldVersion;
     List<int> newVersion;
 
+    if (hotfixBuild = sOldVersion.contains("-hotfix")) {
+      hotfixBuild = true;
+      cOldVersion = sOldVersion.split("-hotfix")[0];
+    }
     if (devBuild = sOldVersion.contains("-dev")) {
       stableBuild = false;
       cOldVersion = sOldVersion.split("-dev")[0];
@@ -75,8 +80,21 @@ class UpdateData {
     }
 
     if (listEquals(oldVersion, newVersion)) {
-      if (appBranch == "stable" && (devBuild || canaryBuild)) {
-        return false;
+      if (appBranch == "stable") {
+        if ((devBuild || canaryBuild)) {
+          return false;
+        }
+        if (vNewVersion.stable.version.contains("-hotfix")) {
+          if (!hotfixBuild) {
+            return false;
+          }
+          int localHotfix = int.parse(sOldVersion.split("-hotfix")[1]);
+          int remoteHotfix =
+              int.parse(vNewVersion.stable.version.split("-hotfix")[1]);
+          if (remoteHotfix > localHotfix) {
+            return false;
+          }
+        }
       }
       if (appBranch == "dev") {
         if (stableBuild || canaryBuild) {
