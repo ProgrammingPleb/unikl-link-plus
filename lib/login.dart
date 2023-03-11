@@ -35,6 +35,7 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     if (widget.relogin) {
+      ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content:
               Text("Invalid saved credentials! Please re-enter your current "
@@ -123,6 +124,7 @@ class _LoginPageState extends State<LoginPage> {
                               .then((resp) {
                             Map<String, dynamic> json = jsonDecode(resp.body);
                             if (json["status"] == "0") {
+                              ScaffoldMessenger.of(context).clearSnackBars();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content:
@@ -158,17 +160,18 @@ class _LoginPageState extends State<LoginPage> {
                                         "password", passwordController.text);
                                     store.setString(
                                         "profile", studentData.toJson());
+                                    setTokenExpiry(
+                                        storeFuture: widget.storeFuture);
+                                    FocusScopeNode currentFocus =
+                                        FocusScope.of(context);
+
+                                    if (!currentFocus.hasPrimaryFocus) {
+                                      currentFocus.unfocus();
+                                    }
+
+                                    Navigator.of(context).pop(studentData);
                                   },
                                 );
-                                setTokenExpiry(storeFuture: widget.storeFuture);
-                                FocusScopeNode currentFocus =
-                                    FocusScope.of(context);
-
-                                if (!currentFocus.hasPrimaryFocus) {
-                                  currentFocus.unfocus();
-                                }
-
-                                Navigator.of(context).pop(studentData);
                               });
                             }
                           });

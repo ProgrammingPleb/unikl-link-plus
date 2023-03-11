@@ -221,9 +221,9 @@ class _MyHomePageState extends State<MyHomePage> {
               child: GestureDetector(
                 onTap: () {
                   Clipboard.setData(ClipboardData(text: id));
+                  ScaffoldMessenger.of(context).clearSnackBars();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      behavior: SnackBarBehavior.floating,
                       content: Text(
                           "Your student ID has been copied to the clipboard!"),
                     ),
