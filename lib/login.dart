@@ -66,47 +66,49 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   Form(
                     key: _formKey,
-                    child: Column(
-                      children: [
-                        TextFormField(
-                          controller: usernameController,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: "Username",
-                          ),
-                          autofillHints: const [
-                            AutofillHints.email,
-                          ],
-                          keyboardType: TextInputType.emailAddress,
-                          validator: (value) {
-                            RegExp emailCheck =
-                                RegExp(r"@(?:[st]\.)?unikl\.edu\.my");
-                            if (emailCheck.hasMatch(value ?? "")) {
-                              return null;
-                            }
-                            return "Please enter a valid UniKL email address.";
-                          },
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 20),
-                          child: TextFormField(
-                            controller: passwordController,
-                            obscureText: true,
+                    child: AutofillGroup(
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            controller: usernameController,
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(),
-                              labelText: "Password",
+                              labelText: "Email",
                             ),
-                            autofillHints: const [AutofillHints.password],
+                            autofillHints: const [
+                              AutofillHints.email,
+                            ],
+                            keyboardType: TextInputType.emailAddress,
                             validator: (value) {
-                              if (value != "") {
+                              RegExp emailCheck =
+                                  RegExp(r"@(?:[st]\.)?unikl\.edu\.my");
+                              if (emailCheck.hasMatch(value ?? "")) {
                                 return null;
                               }
-                              return "Please enter the password "
-                                  "for your account.";
+                              return "Please enter a valid UniKL email address.";
                             },
                           ),
-                        ),
-                      ],
+                          Padding(
+                            padding: const EdgeInsets.only(top: 20),
+                            child: TextFormField(
+                              controller: passwordController,
+                              obscureText: true,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: "Password",
+                              ),
+                              autofillHints: const [AutofillHints.password],
+                              validator: (value) {
+                                if (value != "") {
+                                  return null;
+                                }
+                                return "Please enter the password "
+                                    "for your account.";
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   Padding(
