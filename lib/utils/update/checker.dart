@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_installer/flutter_app_installer.dart';
 import 'package:new_unikl_link/types/settings/data.dart';
 import 'package:new_unikl_link/utils/update/popup.dart';
 import 'package:new_unikl_link/utils/update/updater.dart';
+import 'package:path_provider/path_provider.dart';
 
 Future<void> mainCheckUpdates(BuildContext context, SettingsData settings) {
   Completer<void> c = Completer();
@@ -17,6 +19,17 @@ Future<void> mainCheckUpdates(BuildContext context, SettingsData settings) {
           updateSnackBar(context, updateData);
         });
       }
+    } else {
+      getExternalStorageDirectory().then((directory) {
+        List<FileSystemEntity> directoryList = directory!.listSync().toList();
+        for (FileSystemEntity file in directoryList) {
+          String filename = file.path.split("/").last;
+
+          if (filename.contains("moe.pleb.unikllinkplus")) {
+            file.delete();
+          }
+        }
+      });
     }
   });
 
