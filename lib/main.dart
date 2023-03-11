@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:intl/intl.dart';
+import 'package:new_unikl_link/settings.dart';
+import 'package:new_unikl_link/types/settings/data.dart';
 import 'package:new_unikl_link/types/subject.dart';
 import 'package:new_unikl_link/utils/get_next_or_current_subject.dart';
 import 'package:new_unikl_link/utils/token_tools.dart';
@@ -90,6 +92,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   String name = "Placeholder Name";
   String id = "Placeholder ID";
+  late SettingsData settingsData;
   List<Widget> atAGlance = [];
   late StudentData studentData;
 
@@ -111,8 +114,16 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   void updateAtAGlance() {
-  Future<void> updateAtAGlance() {
-    return getNextOrCurrentSubject(widget._store).then(
+    if (!settingsData.atAGlanceEnabled) {
+      if (atAGlance != []) {
+        setState(() {
+          atAGlance = [];
+        });
+      }
+      return;
+    }
+
+    getNextOrCurrentSubject(widget._store).then(
       (Subject subject) {
         DateTime currentTime = DateTime.now();
         String subjectLocation;
@@ -147,6 +158,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   Future<void> initData() {
     widget._store.then((store) {
+      settingsData = SettingsData.withoutFuture(store);
       if (store.containsKey("profile")) {
         studentData =
             StudentData.fromJson(jsonDecode(store.getString("profile")!));
@@ -318,13 +330,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     child: FloatingActionButton.extended(
                       heroTag: "Settings",
                       onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            behavior: SnackBarBehavior.floating,
-                            content:
-                                Text("This action is not implemented yet!"),
-                          ),
-                        );
+                        Navigator.of(context)
+                            .push(MaterialPageRoute(
+                                builder: (context) => SettingsPage(
+                                      storeFuture: widget._store,
+                                      settingsData: settingsData,
+                                    )))
+                            .then((value) => updateAtAGlance());
                       },
                       icon: const Icon(Icons.settings),
                       label: Column(children: const [
