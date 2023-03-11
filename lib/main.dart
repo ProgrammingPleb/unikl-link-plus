@@ -85,7 +85,7 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   String name = "Placeholder Name";
   String id = "Placeholder ID";
   List<Widget> atAGlance = [];
@@ -93,6 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     initData();
     if (Platform.isAndroid) {
       mainCheckUpdates(context);
@@ -100,6 +101,14 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && name != "Placeholder Name") {
+      updateAtAGlance();
+    }
+  }
+
+  void updateAtAGlance() {
   Future<void> updateAtAGlance() {
     return getNextOrCurrentSubject(widget._store).then(
       (Subject subject) {
