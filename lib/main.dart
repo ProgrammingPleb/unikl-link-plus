@@ -20,6 +20,7 @@ import 'package:new_unikl_link/timetable.dart';
 import 'package:new_unikl_link/types/info/student_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:wakelock/wakelock.dart';
 
 Future<void> main() async {
   if (!kDebugMode) {
@@ -34,6 +35,7 @@ Future<void> main() async {
     );
   } else {
     runApp(const UKLLinkPlusApp());
+    Wakelock.enable();
   }
 }
 
