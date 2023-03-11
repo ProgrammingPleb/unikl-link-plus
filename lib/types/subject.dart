@@ -26,7 +26,7 @@ class Subject {
 
   String getFormattedDuration([bool markdown = false]) {
     if (followingWeek) {
-      return "next week";
+      return "starts next week";
     }
 
     String formattedDuration = "";

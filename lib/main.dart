@@ -55,10 +55,16 @@ class UKLLinkPlusApp extends StatelessWidget {
           theme: ThemeData(
             colorScheme: lightDynamic ?? _defaultLightColorScheme,
             useMaterial3: true,
+            snackBarTheme: const SnackBarThemeData(
+              behavior: SnackBarBehavior.floating,
+            ),
           ),
           darkTheme: ThemeData(
             colorScheme: darkDynamic ?? _defaultDarkColorScheme,
             useMaterial3: true,
+            snackBarTheme: const SnackBarThemeData(
+              behavior: SnackBarBehavior.floating,
+            ),
           ),
           home: MyHomePage(title: 'UniKL Link+'),
         );

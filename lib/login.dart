@@ -113,7 +113,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 20),
-                    child: ElevatedButton(
+                    child: FilledButton.tonal(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           http

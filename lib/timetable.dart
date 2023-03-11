@@ -120,7 +120,8 @@ class _TimetableState extends State<TimetablePage> {
             floating: true,
             title: const Padding(
               padding: EdgeInsets.only(left: 15),
-              child: Text("Student Timetable"),
+              child: Text("Student Timetable",
+                      style: TextStyle(fontWeight: FontWeight.bold),),
             ),
             actions: [
               if (_loading) ...[

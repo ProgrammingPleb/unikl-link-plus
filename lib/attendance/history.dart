@@ -91,7 +91,10 @@ class _AttendanceHistory extends State<AttendanceHistoryPage>
                 sliver: MultiSliver(children: [
                   SliverAppBar.large(
                     floating: true,
-                    title: const Text("Attendance History"),
+                    title: const Text(
+                      "Attendance History",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     actions: [
                       if (!_dataLoaded) ...[
                         const Padding(
