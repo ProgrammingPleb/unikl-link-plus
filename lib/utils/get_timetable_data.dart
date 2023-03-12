@@ -43,10 +43,31 @@ Future<TimetableData> getTimetableData(SharedPreferences store) {
                   .replaceFirst("|BRANCHCODE|", studentData.branchCode)
                   .replaceFirst("|WEEK|", currentWeek.number.toString()))))
           .then((resp) {
-        store.setString("timetable", resp.body);
-        store.setBool("semBreak", currentWeek.type == "Semester Break");
-        store.setBool("finalExam", currentWeek.type == "Exam");
-        c.complete(TimetableData(jsonDecode(resp.body)));
+        TimetableData timetableData = TimetableData(jsonDecode(resp.body));
+        if (timetableData.days[0].entries.isEmpty) {
+          http
+              .get(Uri.parse(eCitieURL.serverQuery(
+                  store.getString("eCitieToken")!,
+                  eCitieQ.timetable
+                      .replaceFirst("|STUDENTID|", store.getString("personID")!)
+                      .replaceFirst("|SEMCODE|", semesterData.latest.code)
+                      .replaceFirst("|BRANCHCODE|", studentData.branchCode)
+                      .replaceFirst("|WEEK|", "1"))))
+              .then(
+            (resp) {
+              timetableData = TimetableData(jsonDecode(resp.body));
+              store.setString("timetable", resp.body);
+              store.setBool("semBreak", currentWeek.type == "Semester Break");
+              store.setBool("finalExam", currentWeek.type == "Exam");
+              c.complete(timetableData);
+            },
+          );
+        } else {
+          store.setString("timetable", resp.body);
+          store.setBool("semBreak", currentWeek.type == "Semester Break");
+          store.setBool("finalExam", currentWeek.type == "Exam");
+          c.complete(timetableData);
+        }
       });
     });
   });
