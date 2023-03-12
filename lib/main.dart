@@ -71,6 +71,7 @@ class UKLLinkPlusApp extends StatelessWidget {
               behavior: SnackBarBehavior.floating,
             ),
           ),
+          debugShowCheckedModeBanner: false,
           home: MyHomePage(title: 'UniKL Link+'),
         );
       }),
@@ -94,6 +95,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   String name = "Placeholder Name";
   String id = "Placeholder ID";
   late SettingsData settingsData;
+  List<Widget> debugBanner = [];
+  List<Widget> debugButton = [];
   List<Widget> atAGlance = [];
   late StudentData studentData;
 
@@ -104,10 +107,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       (value) {
         if (Platform.isAndroid) {
           mainCheckUpdates(context, settingsData);
+          Future.delayed(const Duration(milliseconds: 250))
+              .then((value) => updateDebugInterface());
         }
       },
     );
-
     super.initState();
   }
 
@@ -159,6 +163,49 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       this.name = name;
       this.id = id;
     });
+  }
+
+  void updateDebugInterface() {
+    setState(() {
+      if (settingsData.debugMode || kDebugMode) {
+        debugBanner = [
+          Container(
+            decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.errorContainer),
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Text(
+                  "You are currently in debug mode!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onErrorContainer),
+                ),
+              ),
+            ),
+          )
+        ];
+        debugButton = [enableDebugTests()];
+      } else {
+        debugBanner.clear();
+        debugButton.clear();
+      }
+    });
+  }
+
+  Widget enableDebugTests() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      child: FloatingActionButton.extended(
+        heroTag: "Debug",
+        onPressed: null,
+        icon: const Icon(Icons.science),
+        label: Column(children: const [
+          Text("Debug Tests"),
+        ]),
+      ),
+    );
   }
 
   Future<void> initData() {
@@ -221,208 +268,227 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Welcome Back,",
-              style: TextStyle(
-                fontSize: 15,
-              ),
-            ),
-            Text(
-              name,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: GestureDetector(
-                onTap: () {
-                  Clipboard.setData(ClipboardData(text: id));
-                  ScaffoldMessenger.of(context).clearSnackBars();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                          "Your student ID has been copied to the clipboard!"),
-                    ),
-                  );
-                },
-                child: Text(
-                  "Your ID number is: $id",
-                  style: const TextStyle(
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            ),
-            ...atAGlance,
-            Expanded(
-              child: GridView.count(
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                childAspectRatio: 1.77,
+      body: Column(
+        children: [
+          ...debugBanner,
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 15),
-                    child: FloatingActionButton.extended(
-                      heroTag: "Timetable",
-                      onPressed: () {
-                        Navigator.of(context)
-                            .push(MaterialPageRoute(
-                                builder: (builder) => TimetablePage(
-                                      storeFuture: widget._store,
-                                    )))
-                            .then((value) => updateAtAGlance());
-                      },
-                      icon: const Icon(Icons.event_note),
-                      label: Column(children: const [
-                        Text("Timetable"),
-                      ]),
+                  const Text(
+                    "Welcome Back,",
+                    style: TextStyle(
+                      fontSize: 15,
+                    ),
+                  ),
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 15),
-                    child: FloatingActionButton.extended(
-                      heroTag: "AttHistory",
-                      onPressed: () {
-                        Navigator.of(context)
-                            .push(MaterialPageRoute(
-                                builder: (context) => AttendanceHistoryPage(
-                                      storeFuture: widget._store,
-                                    )))
-                            .then((value) => updateAtAGlance());
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: GestureDetector(
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(text: id));
+                        ScaffoldMessenger.of(context).clearSnackBars();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                "Your student ID has been copied to the clipboard!"),
+                          ),
+                        );
                       },
-                      icon: const Icon(Icons.date_range),
-                      label: Column(children: const [
-                        Text("Attendance"),
-                        Text("History"),
-                      ]),
+                      child: Text(
+                        "Your ID number is: $id",
+                        style: const TextStyle(
+                          fontSize: 15,
+                        ),
+                      ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 15),
-                    child: FloatingActionButton.extended(
-                      heroTag: "SelfAttend",
-                      onPressed: () {
-                        Navigator.of(context)
-                            .push(MaterialPageRoute(
-                                builder: (context) => SelfAttendancePage(
-                                      eCitieURL: widget.eCitieURL,
-                                      eCitieQ: widget.eCitieQ,
-                                      studentData: studentData,
-                                      storeFuture: widget._store,
-                                    )))
-                            .then((value) => updateAtAGlance());
-                      },
-                      icon: const Icon(Icons.qr_code_scanner),
-                      label: Column(children: const [
-                        Text("Self"),
-                        Text("Attendance"),
-                      ]),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 15),
-                    child: FloatingActionButton.extended(
-                      heroTag: "Settings",
-                      onPressed: () {
-                        Navigator.of(context)
-                            .push(MaterialPageRoute<ReloadData>(
-                                builder: (context) => SettingsPage(
-                                      prevContext: context,
-                                      storeFuture: widget._store,
-                                      settingsData: settingsData,
-                                    )))
-                            .then((update) {
-                          if (update != null) {
-                            if (update.studentProfile) {
-                              studentData = update.studentData!;
-                              updateUserDetails(update.studentData!.name,
-                                  update.studentData!.name);
-                            }
-                            if (update.atAGlance) {
-                              updateAtAGlance();
-                            }
-                          }
-                        });
-                      },
-                      icon: const Icon(Icons.settings),
-                      label: Column(children: const [
-                        Text("Settings"),
-                      ]),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 15),
-                    child: FloatingActionButton.extended(
-                      heroTag: "Logout",
-                      onPressed: () {
-                        showDialog(
-                            context: context,
-                            builder: ((context) => AlertDialog(
-                                  title: const Text("Logging Out"),
-                                  content: const Text(
-                                      "Are you sure you want to log out?"),
-                                  actions: [
-                                    TextButton(
-                                        onPressed: () =>
-                                            Navigator.of(context).pop(),
-                                        child: const Text("Cancel")),
-                                    TextButton(
-                                      onPressed: () {
-                                        widget._store.then(
-                                          (store) {
-                                            store.remove("tokenExpiry");
-                                            store.remove("eCitieToken");
-                                            store.remove("o365AccessToken");
-                                            store.remove("o365RefreshToken");
-                                            store.remove("o365TokenExpiryTime");
-                                            store.remove("personID");
-                                            store.remove("username");
-                                            store.remove("password");
-                                            store.remove("profile");
-                                          },
-                                        );
-                                        Navigator.of(context).pop();
-                                        Navigator.of(context)
-                                            .push(MaterialPageRoute<
-                                                    StudentData>(
-                                                builder: (context) => LoginPage(
-                                                    eCitieURL: widget.eCitieURL,
-                                                    eCitieQ: widget.eCitieQ,
-                                                    storeFuture:
-                                                        widget._store)))
-                                            .then((data) {
-                                          setState(() {
-                                            studentData = data!;
-                                            name = data.normalizeName();
-                                          });
-                                        });
-                                      },
-                                      child: const Text("Confirm"),
-                                    )
-                                  ],
-                                )));
-                      },
-                      icon: const Icon(Icons.logout),
-                      label: const Text("Logout"),
+                  ...atAGlance,
+                  Expanded(
+                    child: GridView.count(
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 2,
+                      childAspectRatio: 1.77,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 15),
+                          child: FloatingActionButton.extended(
+                            heroTag: "Timetable",
+                            onPressed: () {
+                              Navigator.of(context)
+                                  .push(MaterialPageRoute(
+                                      builder: (builder) => TimetablePage(
+                                            storeFuture: widget._store,
+                                          )))
+                                  .then((value) => updateAtAGlance());
+                            },
+                            icon: const Icon(Icons.event_note),
+                            label: Column(children: const [
+                              Text("Timetable"),
+                            ]),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 15),
+                          child: FloatingActionButton.extended(
+                            heroTag: "AttHistory",
+                            onPressed: () {
+                              Navigator.of(context)
+                                  .push(MaterialPageRoute(
+                                      builder: (context) =>
+                                          AttendanceHistoryPage(
+                                            storeFuture: widget._store,
+                                          )))
+                                  .then((value) => updateAtAGlance());
+                            },
+                            icon: const Icon(Icons.date_range),
+                            label: Column(children: const [
+                              Text("Attendance"),
+                              Text("History"),
+                            ]),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 15),
+                          child: FloatingActionButton.extended(
+                            heroTag: "SelfAttend",
+                            onPressed: () {
+                              Navigator.of(context)
+                                  .push(MaterialPageRoute(
+                                      builder: (context) => SelfAttendancePage(
+                                            eCitieURL: widget.eCitieURL,
+                                            eCitieQ: widget.eCitieQ,
+                                            studentData: studentData,
+                                            storeFuture: widget._store,
+                                          )))
+                                  .then((value) => updateAtAGlance());
+                            },
+                            icon: const Icon(Icons.qr_code_scanner),
+                            label: Column(children: const [
+                              Text("Self"),
+                              Text("Attendance"),
+                            ]),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 15),
+                          child: FloatingActionButton.extended(
+                            heroTag: "Settings",
+                            onPressed: () {
+                              Navigator.of(context)
+                                  .push(MaterialPageRoute<ReloadData>(
+                                      builder: (context) => SettingsPage(
+                                            prevContext: context,
+                                            storeFuture: widget._store,
+                                            settingsData: settingsData,
+                                          )))
+                                  .then((update) {
+                                if (update != null) {
+                                  if (update.studentProfile) {
+                                    studentData = update.studentData!;
+                                    updateUserDetails(update.studentData!.name,
+                                        update.studentData!.name);
+                                  }
+                                  if (update.atAGlance) {
+                                    updateAtAGlance();
+                                  }
+                                  if (update.debugInterface) {
+                                    updateDebugInterface();
+                                  }
+                                }
+                              });
+                            },
+                            icon: const Icon(Icons.settings),
+                            label: Column(children: const [
+                              Text("Settings"),
+                            ]),
+                          ),
+                        ),
+                        ...debugButton,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 15),
+                          child: FloatingActionButton.extended(
+                            heroTag: "Logout",
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  builder: ((context) => AlertDialog(
+                                        title: const Text("Logging Out"),
+                                        content: const Text(
+                                            "Are you sure you want to log out?"),
+                                        actions: [
+                                          TextButton(
+                                              onPressed: () =>
+                                                  Navigator.of(context).pop(),
+                                              child: const Text("Cancel")),
+                                          TextButton(
+                                            onPressed: () {
+                                              widget._store.then(
+                                                (store) {
+                                                  store.remove("tokenExpiry");
+                                                  store.remove("eCitieToken");
+                                                  store.remove(
+                                                      "o365AccessToken");
+                                                  store.remove(
+                                                      "o365RefreshToken");
+                                                  store.remove(
+                                                      "o365TokenExpiryTime");
+                                                  store.remove("personID");
+                                                  store.remove("username");
+                                                  store.remove("password");
+                                                  store.remove("profile");
+                                                },
+                                              );
+                                              Navigator.of(context).pop();
+                                              Navigator.of(context)
+                                                  .push(MaterialPageRoute<
+                                                          StudentData>(
+                                                      builder: (context) =>
+                                                          LoginPage(
+                                                              eCitieURL: widget
+                                                                  .eCitieURL,
+                                                              eCitieQ: widget
+                                                                  .eCitieQ,
+                                                              storeFuture:
+                                                                  widget
+                                                                      ._store)))
+                                                  .then((data) {
+                                                setState(() {
+                                                  studentData = data!;
+                                                  name = data.normalizeName();
+                                                });
+                                              });
+                                            },
+                                            child: const Text("Confirm"),
+                                          )
+                                        ],
+                                      )));
+                            },
+                            icon: const Icon(Icons.logout),
+                            label: const Text("Logout"),
+                          ),
+                        )
+                      ],
                     ),
                   )
                 ],
               ),
-            )
-          ],
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }

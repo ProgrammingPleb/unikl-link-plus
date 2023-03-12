@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:new_unikl_link/pages/login.dart';
 import 'package:new_unikl_link/server/query.dart';
@@ -64,6 +65,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         padding: const EdgeInsets.only(bottom: 30),
                         child: atAGlance(context),
                       ),
+                      ...enableDebug(context),
                       resetCache(context),
                     ],
                   ),
@@ -74,6 +76,64 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
     );
+  }
+
+  List<Widget> enableDebug(BuildContext context) {
+    if (!widget.settingsData.debugPermissible) {
+      return [];
+    }
+
+    return [
+      Padding(
+        padding: const EdgeInsets.only(bottom: 30),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            SizedBox(
+              width: MediaQuery.of(context).size.width / 1.5,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 2),
+                    child: Text(
+                      "Enable Debug Tests",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Text(
+                    "Enables a testing page for debugging UI issues.",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    "Not needed if the UI is working properly.",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Switch(
+              thumbIcon: switchIcons,
+              value: widget.settingsData.debugMode,
+              onChanged: kDebugMode
+                  ? null
+                  : (value) {
+                      setState(() {
+                        reloadData.debugInterface = true;
+                        widget.settingsData.debugMode = value;
+                      });
+                    },
+            ),
+          ],
+        ),
+      ),
+    ];
   }
 
   Row resetCache(BuildContext context) {
@@ -185,16 +245,6 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Row atAGlance(BuildContext context) {
-    final MaterialStateProperty<Icon?> thumbIcon =
-        MaterialStateProperty.resolveWith<Icon?>(
-      (Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) {
-          return const Icon(Icons.check);
-        }
-        return const Icon(Icons.close);
-      },
-    );
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -225,7 +275,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ],
         ),
         Switch(
-          thumbIcon: thumbIcon,
+          thumbIcon: switchIcons,
           value: widget.settingsData.atAGlanceEnabled,
           onChanged: (value) {
             setState(() {
@@ -248,7 +298,7 @@ class _SettingsPageState extends State<SettingsPage> {
               const Padding(
                 padding: EdgeInsets.only(bottom: 2),
                 child: Text(
-                  "App Testing Branch",
+                  "App Release Branch",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                   ),
@@ -313,4 +363,14 @@ class _SettingsPageState extends State<SettingsPage> {
       ],
     );
   }
+
+  final MaterialStateProperty<Icon?> switchIcons =
+      MaterialStateProperty.resolveWith<Icon?>(
+    (Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        return const Icon(Icons.check);
+      }
+      return const Icon(Icons.close);
+    },
+  );
 }

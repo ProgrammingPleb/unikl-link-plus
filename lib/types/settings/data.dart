@@ -2,12 +2,15 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:new_unikl_link/types/settings/invalid_branch.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsData {
   late final SharedPreferences store;
   String _appBranch = "stable";
   bool _atAGlanceEnabled = true;
+  bool _debugMode = false;
+  bool _debugPermissible = false;
 
   SettingsData(Future<SharedPreferences> storeFuture) {
     storeFuture.then((store) {
@@ -39,17 +42,34 @@ class SettingsData {
     return jsonEncode({
       "appBranch": _appBranch,
       "atAGlanceEnabled": _atAGlanceEnabled,
+      "debugMode": _debugMode,
     });
   }
 
-  void processSettings(Map<String, dynamic> settings) {
-    List<String> allSettingsKeys = ["appBranch", "atAGlanceEnabled"];
+  void processSettings(Map<String, dynamic> settings) async {
+    List<String> allSettingsKeys = [
+      "appBranch",
+      "atAGlanceEnabled",
+      "debugMode",
+    ];
 
     if (settings["appBranch"] != null) {
       _appBranch = settings["appBranch"];
     }
     if (settings["atAGlanceEnabled"] != null) {
       _atAGlanceEnabled = settings["atAGlanceEnabled"];
+    }
+    if (settings["debugMode"] != null) {
+      PackageInfo versionData = await PackageInfo.fromPlatform();
+      if (versionData.version.contains("-canary")) {
+        _debugMode = settings["debugMode"];
+        _debugPermissible = true;
+      } else if (settings["debugMode"]) {
+        updateSettings();
+      }
+      if (kDebugMode) {
+        _debugMode = true;
+      }
     }
 
     if (!listEquals(settings.keys.toList(), allSettingsKeys)) {
@@ -80,5 +100,18 @@ class SettingsData {
   set atAGlanceEnabled(bool enabled) {
     _atAGlanceEnabled = enabled;
     updateSettings();
+  }
+
+  bool get debugMode {
+    return _debugMode;
+  }
+
+  set debugMode(bool enabled) {
+    _debugMode = enabled;
+    updateSettings();
+  }
+
+  bool get debugPermissible {
+    return _debugPermissible;
   }
 }
