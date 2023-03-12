@@ -133,12 +133,13 @@ Future<UpdateData> checkUpdates(SettingsData settings) {
   Completer<UpdateData> c = Completer();
   Future<PackageInfo> packageInfo = PackageInfo.fromPlatform();
   Future<SharedPreferences> storeFuture = SharedPreferences.getInstance();
+  String updateURL = kDebugMode
+      ? "https://pleb.moe/UniKLLinkPlus/version-staging.json"
+      : "https://pleb.moe/UniKLLinkPlus/version-v2.json";
 
   storeFuture.then((store) {
     packageInfo.then((appInfo) {
-      http
-          .get(Uri.parse("https://pleb.moe/UniKLLinkPlus/version-v2.json"))
-          .then((resp) {
+      http.get(Uri.parse(updateURL)).then((resp) {
         VersionData versionData = VersionData(resp.body);
         UpdateData updateData =
             UpdateData(appInfo.version, versionData, settings.appBranch);
