@@ -338,6 +338,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                         Navigator.of(context)
                             .push(MaterialPageRoute<ReloadData>(
                                 builder: (context) => SettingsPage(
+                                      prevContext: context,
                                       storeFuture: widget._store,
                                       settingsData: settingsData,
                                     )))

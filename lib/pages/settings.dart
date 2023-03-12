@@ -7,14 +7,17 @@ import 'package:new_unikl_link/types/settings/data.dart';
 import 'package:new_unikl_link/types/settings/reload_data.dart';
 import 'package:new_unikl_link/utils/get_timetable_data.dart';
 import 'package:new_unikl_link/utils/token_tools.dart';
+import 'package:new_unikl_link/utils/update/checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsPage extends StatefulWidget {
+  final BuildContext prevContext;
   final Future<SharedPreferences> storeFuture;
   final SettingsData settingsData;
 
   const SettingsPage({
     Key? key,
+    required this.prevContext,
     required this.storeFuture,
     required this.settingsData,
   }) : super(key: key);
@@ -301,6 +304,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ],
           selected: {widget.settingsData.appBranch},
           onSelectionChanged: (value) {
+            mainCheckUpdates(widget.prevContext, widget.settingsData);
             setState(() {
               widget.settingsData.appBranch = value.first;
             });
