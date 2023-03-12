@@ -67,8 +67,10 @@ class UpdateData {
           .split(".")
           .map((e) => int.parse(e)));
     } else {
-      newVersion = List.from(
-          vNewVersion.stable.version.split(".").map((e) => int.parse(e)));
+      newVersion = List.from(vNewVersion.stable.version
+          .split("-hotfix")[0]
+          .split(".")
+          .map((e) => int.parse(e)));
     }
     int pos = 0;
 
