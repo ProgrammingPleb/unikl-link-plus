@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 class StudentSemesterData {
   List<StudentSemester> semesters = [];
@@ -28,8 +29,8 @@ class StudentSemester {
   final String set;
   late final DateTime startTime;
   late final DateTime endTime;
-  final double? gpa;
-  final double? cgpa;
+  double? _gpa;
+  double? _cgpa;
 
   StudentSemester({
     required this.code,
@@ -37,11 +38,25 @@ class StudentSemester {
     required this.set,
     required String startTime,
     required String endTime,
-    this.gpa,
-    this.cgpa,
+    gpa,
+    cgpa,
   }) {
     DateFormat dateFormat = DateFormat("MMM d, yyyy h:mm:ss a");
+    try {
+      _gpa = double.parse(gpa.toString());
+      _cgpa = double.parse(cgpa.toString());
+    } catch (ex, stackTrace) {
+      Sentry.captureException(ex, stackTrace: stackTrace);
+    }
     this.startTime = dateFormat.parse(startTime);
     this.endTime = dateFormat.parse(endTime);
+  }
+
+  double? get gpa {
+    return _gpa;
+  }
+
+  double? get cgpa {
+    return _cgpa;
   }
 }
