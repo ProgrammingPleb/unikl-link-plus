@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SettingsData {
   late final SharedPreferences store;
   String _appBranch = "stable";
+  int _tokenRefreshHours = 24;
   bool _atAGlanceEnabled = true;
   bool _debugMode = false;
   bool _debugPermissible = false;
@@ -35,7 +36,9 @@ class SettingsData {
   @override
   String toString() {
     return "App Branch: $_appBranch, "
-        "\"At A Glance\" Enabled: $_atAGlanceEnabled";
+        "\"At A Glance\" Enabled: $_atAGlanceEnabled"
+        "Debug Mode Enabled: $_debugMode"
+        "Token Refresh Hours: $_tokenRefreshHours";
   }
 
   String toJson() {
@@ -43,6 +46,7 @@ class SettingsData {
       "appBranch": _appBranch,
       "atAGlanceEnabled": _atAGlanceEnabled,
       "debugMode": _debugMode,
+      "tokenRefreshHours": _tokenRefreshHours,
     });
   }
 
@@ -51,6 +55,7 @@ class SettingsData {
       "appBranch",
       "atAGlanceEnabled",
       "debugMode",
+      "tokenRefreshHours"
     ];
 
     if (settings["appBranch"] != null) {
@@ -58,6 +63,9 @@ class SettingsData {
     }
     if (settings["atAGlanceEnabled"] != null) {
       _atAGlanceEnabled = settings["atAGlanceEnabled"];
+    }
+    if (settings["tokenRefreshHours"] != null) {
+      _tokenRefreshHours = settings["tokenRefreshHours"];
     }
     if (settings["debugMode"] != null) {
       PackageInfo versionData = await PackageInfo.fromPlatform();
@@ -113,5 +121,14 @@ class SettingsData {
 
   bool get debugPermissible {
     return _debugPermissible;
+  }
+
+  set tokenRefreshHours(int hours) {
+    _tokenRefreshHours = hours;
+    updateSettings();
+  }
+
+  int get tokenRefreshHours {
+    return _tokenRefreshHours;
   }
 }

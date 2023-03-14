@@ -63,6 +63,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.only(bottom: 30),
+                        child: tokenRefreshHours(context),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 30),
                         child: atAGlance(context),
                       ),
                       ...enableDebug(context),
@@ -284,6 +288,50 @@ class _SettingsPageState extends State<SettingsPage> {
             });
           },
         ),
+      ],
+    );
+  }
+
+  Column tokenRefreshHours(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(bottom: 2),
+                child: Text(
+                  "Data Refresh Frequency",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Text(
+                "Determines how frequent the data in the app "
+                "should update.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Slider(
+          value: widget.settingsData.tokenRefreshHours.toDouble(),
+          divisions: 3,
+          min: 24.0,
+          max: 96.0,
+          label: "${widget.settingsData.tokenRefreshHours.toString()} hours",
+          onChanged: (value) {
+            setState(() {
+              widget.settingsData.tokenRefreshHours = value.toInt();
+            });
+          },
+        )
       ],
     );
   }

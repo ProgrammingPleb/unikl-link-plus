@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:new_unikl_link/server/urls.dart';
 import 'package:new_unikl_link/types/auth.dart';
+import 'package:new_unikl_link/types/settings/data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 DateFormat expiryFormat = DateFormat("dd MM yyyy - HH mm", "en-US");
@@ -74,9 +75,11 @@ Future<TokenStatus> checkToken(
 Future<void> setTokenExpiry({Future<SharedPreferences>? storeFuture}) {
   Completer<void> c = Completer<void>();
   storeFuture ??= SharedPreferences.getInstance();
-  DateTime expiryTime = DateTime.now().add(const Duration(minutes: 30));
-
   storeFuture.then((store) {
+    SettingsData settings = SettingsData.withoutFuture(store);
+    DateTime expiryTime =
+        DateTime.now().add(Duration(hours: settings.tokenRefreshHours));
+
     store.setString("tokenExpiry", expiryFormat.format(expiryTime));
   });
 
