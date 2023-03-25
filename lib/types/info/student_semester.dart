@@ -43,8 +43,12 @@ class StudentSemester {
   }) {
     DateFormat dateFormat = DateFormat("MMM d, yyyy h:mm:ss a");
     try {
-      _gpa = double.parse(gpa.toString());
-      _cgpa = double.parse(cgpa.toString());
+      if (gpa != null) {
+        _gpa = double.parse(gpa.toString());
+      }
+      if (_cgpa != null) {
+        _cgpa = double.parse(cgpa.toString());
+      }
     } catch (ex, stackTrace) {
       Sentry.captureException(ex, stackTrace: stackTrace);
     }
