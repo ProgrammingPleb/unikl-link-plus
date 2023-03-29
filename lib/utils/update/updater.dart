@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:new_unikl_link/types/settings/data.dart';
+import 'package:new_unikl_link/utils/update/verify.dart';
 import 'package:new_unikl_link/utils/update/version_data.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -149,10 +150,26 @@ Future<UpdateData> checkUpdates(SettingsData settings) {
                 "${updateData.latestVersion}.apk");
             updateFile.exists().then((exists) {
               if (exists) {
-                updateData.isDownloaded = true;
-                updateData.payloadFile = updateFile;
+                getFileSha256(updateFile.path).then((value) {
+                  Version version = versionData.stable;
+                  if (settings.appBranch == "dev") {
+                    version = versionData.dev;
+                  }
+                  if (settings.appBranch == "canary") {
+                    version = versionData.canary;
+                  }
+
+                  if (value.toString() == version.checksum) {
+                    updateData.isDownloaded = true;
+                    updateData.payloadFile = updateFile;
+                  } else {
+                    updateFile.deleteSync();
+                  }
+                  c.complete(updateData);
+                });
+              } else {
+                c.complete(updateData);
               }
-              c.complete(updateData);
             });
           });
         } else {

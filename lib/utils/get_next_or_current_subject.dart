@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:intl/intl.dart';
+import 'package:new_unikl_link/types/settings/data.dart';
 import 'package:new_unikl_link/types/subject.dart';
 import 'package:new_unikl_link/types/timetable/data.dart';
 import 'package:new_unikl_link/types/timetable/day.dart';
@@ -10,7 +11,7 @@ import 'package:new_unikl_link/utils/get_timetable_data.dart';
 import 'package:new_unikl_link/utils/normalize.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Future<Subject> getNextOrCurrentSubject(Future<SharedPreferences> storeFuture) {
+Future<Subject> getNextOrCurrentSubject(Future<SharedPreferences> storeFuture, SettingsData settings) {
   Completer<Subject> c = Completer<Subject>();
   TimetableData timetable;
   bool foundSubject = false;
@@ -33,8 +34,8 @@ Future<Subject> getNextOrCurrentSubject(Future<SharedPreferences> storeFuture) {
             code: entry.subjectCode,
             roomCode: entry.roomCode,
             online: entry.online,
-            startTime: normalizeTime(entry.startTime, checkedTime),
-            endTime: normalizeTime(entry.endTime, checkedTime),
+            startTime: normalizeTime(entry.startTime(settings.fastingTimetable), checkedTime),
+            endTime: normalizeTime(entry.endTime(settings.fastingTimetable), checkedTime),
           );
           if (currentSubject.isOngoing() || !currentSubject.hasStarted()) {
             c.complete(currentSubject);
@@ -55,8 +56,8 @@ Future<Subject> getNextOrCurrentSubject(Future<SharedPreferences> storeFuture) {
         code: firstSubjectOfWeek.subjectCode,
         roomCode: firstSubjectOfWeek.roomCode,
         online: firstSubjectOfWeek.online,
-        startTime: normalizeTime(firstSubjectOfWeek.startTime, checkedTime),
-        endTime: normalizeTime(firstSubjectOfWeek.endTime, checkedTime),
+        startTime: normalizeTime(firstSubjectOfWeek.startTime(settings.fastingTimetable), checkedTime),
+        endTime: normalizeTime(firstSubjectOfWeek.endTime(settings.fastingTimetable), checkedTime),
         followingWeek: true,
       );
       c.complete(currentSubject);
