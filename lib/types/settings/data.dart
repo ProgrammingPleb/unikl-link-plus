@@ -12,6 +12,7 @@ class SettingsData {
   bool _atAGlanceEnabled = true;
   bool _debugMode = false;
   bool _debugPermissible = false;
+  bool _fastingTimetable = false;
 
   SettingsData(Future<SharedPreferences> storeFuture) {
     storeFuture.then((store) {
@@ -36,9 +37,10 @@ class SettingsData {
   @override
   String toString() {
     return "App Branch: $_appBranch, "
-        "\"At A Glance\" Enabled: $_atAGlanceEnabled"
-        "Debug Mode Enabled: $_debugMode"
-        "Token Refresh Hours: $_tokenRefreshHours";
+        "\"At A Glance\" Enabled: $_atAGlanceEnabled, "
+        "Debug Mode Enabled: $_debugMode, "
+        "Token Refresh Hours: $_tokenRefreshHours, "
+        "Fasting Timetable: $_fastingTimetable";
   }
 
   String toJson() {
@@ -47,6 +49,7 @@ class SettingsData {
       "atAGlanceEnabled": _atAGlanceEnabled,
       "debugMode": _debugMode,
       "tokenRefreshHours": _tokenRefreshHours,
+      "fastingTimetable" : _fastingTimetable,
     });
   }
 
@@ -55,7 +58,8 @@ class SettingsData {
       "appBranch",
       "atAGlanceEnabled",
       "debugMode",
-      "tokenRefreshHours"
+      "tokenRefreshHours",
+      "fastingTimetable",
     ];
 
     if (settings["appBranch"] != null) {
@@ -66,6 +70,9 @@ class SettingsData {
     }
     if (settings["tokenRefreshHours"] != null) {
       _tokenRefreshHours = settings["tokenRefreshHours"];
+    }
+    if (settings["fastingTimetable"] != null) {
+      _fastingTimetable = settings["fastingTimetable"];
     }
     if (settings["debugMode"] != null) {
       PackageInfo versionData = await PackageInfo.fromPlatform();
@@ -130,5 +137,14 @@ class SettingsData {
 
   int get tokenRefreshHours {
     return _tokenRefreshHours;
+  }
+
+  set fastingTimetable(bool enabled) {
+    _fastingTimetable = enabled;
+    updateSettings();
+  }
+
+  bool get fastingTimetable {
+    return _fastingTimetable;
   }
 }

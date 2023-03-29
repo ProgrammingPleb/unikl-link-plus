@@ -10,16 +10,17 @@ class TimetableDay {
   void addEntry({
     required String subjectCode,
     required String subjectName,
-    required String startTime,
-    required String endTime,
+    required int startSlot,
+    required int endSlot,
     required bool online,
     required String roomCode,
   }) {
     entries.add(TimetableDayEntry(
+      dayIndex: dayIndex,
       subjectCode: subjectCode,
       subjectName: subjectName,
-      startTime: startTime,
-      endTime: endTime,
+      startSlot: startSlot,
+      endSlot: endSlot,
       online: online,
       roomCode: roomCode,
     ));
