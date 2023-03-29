@@ -50,6 +50,9 @@ dependencies:
   flutter_markdown: ^0.6.14
   skeletons: ^0.0.3
   wakelock: ^0.6.2
+  crypto: ^3.0.2
+  async: any
+  convert: ^3.1.1
 
 dev_dependencies:
   flutter_test:

@@ -56,10 +56,12 @@ class Version {
   late final String version;
   late final String url;
   late final String changelog;
+  late final String checksum;
 
   Version(Map<String, dynamic> data) {
     version = data["version"]!;
     url = data["url"]!;
     changelog = data["changelog"]!;
+    checksum = data["checksum"]!;
   }
 }
