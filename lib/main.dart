@@ -132,7 +132,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       return;
     }
 
-    getNextOrCurrentSubject(widget._store).then(
+    getNextOrCurrentSubject(widget._store, settingsData).then(
       (Subject subject) {
         DateTime currentTime = DateTime.now();
         String subjectLocation;
@@ -328,6 +328,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                                   .push(MaterialPageRoute(
                                       builder: (builder) => TimetablePage(
                                             storeFuture: widget._store,
+                                            settings: settingsData,
                                           )))
                                   .then((value) => updateAtAGlance());
                             },

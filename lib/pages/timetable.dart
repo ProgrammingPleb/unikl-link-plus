@@ -5,6 +5,7 @@ import 'package:new_unikl_link/components/timetable_entry_no_physical.dart';
 import 'package:new_unikl_link/components/timetable_entry_with_physical.dart';
 import 'package:new_unikl_link/server/query.dart';
 import 'package:new_unikl_link/server/urls.dart';
+import 'package:new_unikl_link/types/settings/data.dart';
 import 'package:new_unikl_link/types/timetable/data.dart';
 import 'package:new_unikl_link/utils/get_timetable_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,8 +14,9 @@ class TimetablePage extends StatefulWidget {
   final ECitieURLs eCitieURL = ECitieURLs();
   final ECitieQuery eCitieQ = ECitieQuery();
   final Future<SharedPreferences> storeFuture;
+  final SettingsData settings;
 
-  TimetablePage({Key? key, required this.storeFuture}) : super(key: key);
+  TimetablePage({Key? key, required this.storeFuture, required this.settings}) : super(key: key);
 
   @override
   State<TimetablePage> createState() => _TimetableState();
@@ -52,32 +54,56 @@ class _TimetableState extends State<TimetablePage> {
 
     getData().then((data) {
       for (var day in data.days) {
-        timetableList.add(
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
-            child: Text(
-              day.dayName,
-              style: const TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
+        if (widget.settings.fastingTimetable && day.dayIndex == 5) {
+          timetableList.add(
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 10, 0, 2),
+              child: Text(
+                day.dayName,
+                style: const TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-        );
+          );
+          timetableList.add(
+            const Padding(
+              padding: EdgeInsets.only(bottom: 15),
+              child: Text(
+                "There will be a break between 12:30PM and 2:30PM.\n"
+                "Any subjects which are in this range will be paused in this time.",
+              ),
+            ),
+          );
+        } else {
+          timetableList.add(
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
+              child: Text(
+                day.dayName,
+                style: const TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          );
+        }
         for (var entry in day.entries) {
           Widget entryType;
 
           if (entry.online) {
             entryType = TimetableEntryNoPhysical(
-              startTime: entry.startTime,
-              endTime: entry.endTime,
+              startTime: entry.startTime(widget.settings.fastingTimetable),
+              endTime: entry.endTime(widget.settings.fastingTimetable),
               subjectCode: entry.subjectCode,
               subjectName: entry.subjectName,
             );
           } else {
             entryType = TimetableEntryWithPhysical(
-              startTime: entry.startTime,
-              endTime: entry.endTime,
+              startTime: entry.startTime(widget.settings.fastingTimetable),
+              endTime: entry.endTime(widget.settings.fastingTimetable),
               subjectCode: entry.subjectCode,
               subjectName: entry.subjectName,
               roomCode: entry.roomCode,

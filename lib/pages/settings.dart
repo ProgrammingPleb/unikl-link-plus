@@ -69,6 +69,10 @@ class _SettingsPageState extends State<SettingsPage> {
                         padding: const EdgeInsets.only(bottom: 30),
                         child: atAGlance(context),
                       ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 30),
+                        child: fastingTimetable(context),
+                      ),
                       ...enableDebug(context),
                       resetCache(context),
                     ],
@@ -258,7 +262,7 @@ class _SettingsPageState extends State<SettingsPage> {
             const Padding(
               padding: EdgeInsets.only(bottom: 2),
               child: Text(
-                "Show \"At A Glance\"",
+                "Show \"At a Glance\"",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
@@ -285,6 +289,50 @@ class _SettingsPageState extends State<SettingsPage> {
             setState(() {
               reloadData.atAGlance = true;
               widget.settingsData.atAGlanceEnabled = value;
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  Row fastingTimetable(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(bottom: 2),
+              child: Text(
+                "Fasting Month",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            Text(
+              "Changes the timetable to use the",
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            Text(
+              "fasting month timetable instead.",
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        Switch(
+          thumbIcon: switchIcons,
+          value: widget.settingsData.fastingTimetable,
+          onChanged: (value) {
+            setState(() {
+              reloadData.atAGlance = true;
+              widget.settingsData.fastingTimetable = value;
             });
           },
         ),
