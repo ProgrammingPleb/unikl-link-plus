@@ -16,7 +16,8 @@ class TimetablePage extends StatefulWidget {
   final Future<SharedPreferences> storeFuture;
   final SettingsData settings;
 
-  TimetablePage({Key? key, required this.storeFuture, required this.settings}) : super(key: key);
+  TimetablePage({Key? key, required this.storeFuture, required this.settings})
+      : super(key: key);
 
   @override
   State<TimetablePage> createState() => _TimetableState();
@@ -72,7 +73,8 @@ class _TimetableState extends State<TimetablePage> {
               padding: EdgeInsets.only(bottom: 15),
               child: Text(
                 "There will be a break between 12:30PM and 2:30PM.\n"
-                "Any subjects which are in this range will be paused in this time.",
+                "Any subjects which are in this range will be paused "
+                "at this time.",
               ),
             ),
           );
@@ -146,8 +148,10 @@ class _TimetableState extends State<TimetablePage> {
             floating: true,
             title: const Padding(
               padding: EdgeInsets.only(left: 15),
-              child: Text("Student Timetable",
-                      style: TextStyle(fontWeight: FontWeight.bold),),
+              child: Text(
+                "Student Timetable",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
             actions: [
               if (_loading) ...[
