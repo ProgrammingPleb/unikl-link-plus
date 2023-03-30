@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:new_unikl_link/types/settings/data.dart';
 import 'package:new_unikl_link/utils/update/verify.dart';
@@ -182,9 +183,17 @@ Future<UpdateData> checkUpdates(SettingsData settings) {
   return c.future;
 }
 
-Future<DownloadData> downloadUpdatePayload(UpdateData updateData) {
+Future<DownloadData> downloadUpdatePayload(BuildContext context,
+    void Function(int, bool) progressUpdate, UpdateData updateData) {
   Completer<DownloadData> c = Completer<DownloadData>();
+  bool displayed = false;
   Dio dio = Dio();
+
+  void showDownloadProgress(int received, int total) {
+    int progress = ((received / total) * 100).toInt();
+    progressUpdate(progress, displayed);
+    displayed = true;
+  }
 
   getExternalStorageDirectory().then((directory) {
     dio
@@ -192,6 +201,12 @@ Future<DownloadData> downloadUpdatePayload(UpdateData updateData) {
             updateData.url,
             "${directory!.path}/moe.pleb.unikllinkplus-"
             "${updateData.latestVersion}.apk",
+            options: Options(
+              headers: {
+                HttpHeaders.acceptEncodingHeader: "*",
+              },
+            ),
+            onReceiveProgress: showDownloadProgress,
             deleteOnError: true)
         .then((value) {
       updateData.payloadFile = File("${directory.path}/moe.pleb.unikllinkplus-"

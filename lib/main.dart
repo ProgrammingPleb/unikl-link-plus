@@ -98,6 +98,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   List<Widget> debugBanner = [];
   List<Widget> debugButton = [];
   List<Widget> atAGlance = [];
+  final ValueNotifier<int> snackMsg = ValueNotifier(0);
   late StudentData studentData;
 
   @override
@@ -106,7 +107,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     initData().then(
       (value) {
         if (Platform.isAndroid) {
-          mainCheckUpdates(context, settingsData);
+          mainCheckUpdates(context, showDownloadProgress, settingsData);
           Future.delayed(const Duration(milliseconds: 250))
               .then((value) => updateDebugInterface());
         }
@@ -119,6 +120,21 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && name != "Placeholder Name") {
       updateAtAGlance();
+    }
+  }
+
+  void showDownloadProgress(int progress, bool displayed) {
+    if (!displayed) {
+      snackMsg.value = 0;
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: SnackContent(snackMsg),
+          duration: const Duration(minutes: 30),
+        ),
+      );
+    } else {
+      snackMsg.value = progress;
     }
   }
 
@@ -408,6 +424,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                                   if (update.debugInterface) {
                                     updateDebugInterface();
                                   }
+                                  if (update.changedVersions) {
+                                    mainCheckUpdates(context,
+                                        showDownloadProgress, settingsData);
+                                  }
                                 }
                               });
                             },
@@ -492,5 +512,19 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         ],
       ),
     );
+  }
+}
+
+class SnackContent extends StatelessWidget {
+  final ValueNotifier<int> snackMsg;
+
+  const SnackContent(this.snackMsg, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<int>(
+        valueListenable: snackMsg,
+        builder: (_, progress, __) =>
+            Text("An update is being downloaded. ($progress% complete)"));
   }
 }

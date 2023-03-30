@@ -7,7 +7,10 @@ import 'package:new_unikl_link/utils/update/popup.dart';
 import 'package:new_unikl_link/utils/update/updater.dart';
 import 'package:path_provider/path_provider.dart';
 
-Future<void> mainCheckUpdates(BuildContext context, SettingsData settings) {
+Future<void> mainCheckUpdates(
+    BuildContext context,
+    void Function(int progress, bool displayed) progressUpdate,
+    SettingsData settings) {
   Completer<void> c = Completer();
 
   checkUpdates(settings).then((updateData) {
@@ -15,7 +18,8 @@ Future<void> mainCheckUpdates(BuildContext context, SettingsData settings) {
       if (updateData.isDownloaded) {
         updateSnackBar(context, updateData);
       } else {
-        downloadUpdatePayload(updateData).then((dlData) {
+        downloadUpdatePayload(context, progressUpdate, updateData)
+            .then((dlData) {
           updateSnackBar(context, updateData);
         });
       }
@@ -37,6 +41,7 @@ Future<void> mainCheckUpdates(BuildContext context, SettingsData settings) {
 }
 
 void updateSnackBar(BuildContext context, UpdateData updateData) {
+  ScaffoldMessenger.of(context).clearSnackBars();
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     content: const Text("An app update is now available!"),
     action: SnackBarAction(
