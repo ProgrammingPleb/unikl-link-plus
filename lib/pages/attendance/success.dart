@@ -29,6 +29,7 @@ class _AttendanceSuccessState extends State<AttendanceSuccess> {
               padding: EdgeInsets.only(top: 30),
               child: Text(
                 "Self Attendance Successful",
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
@@ -49,13 +50,25 @@ class _AttendanceSuccessState extends State<AttendanceSuccess> {
   void initState() {
     if (widget.qrResp.sessionInfo == null) {
       details = [
-        const Text("Self attendance was recorded."),
+        const Text(
+          "Self attendance was recorded.",
+          textAlign: TextAlign.center,
+        ),
       ];
     } else {
       details = [
-        Text("Lecturer: ${widget.qrResp.sessionInfo?.staffName}"),
-        Text("Subject: ${widget.qrResp.sessionInfo?.subjectName}"),
-        Text("Group: ${widget.qrResp.sessionInfo?.group}"),
+        Text(
+          "Lecturer: ${widget.qrResp.sessionInfo?.staffName}",
+          textAlign: TextAlign.center,
+        ),
+        Text(
+          "Subject: ${widget.qrResp.sessionInfo?.subjectName}",
+          textAlign: TextAlign.center,
+        ),
+        Text(
+          "Group: ${widget.qrResp.sessionInfo?.group}",
+          textAlign: TextAlign.center,
+        ),
       ];
     }
     super.initState();
