@@ -22,7 +22,7 @@ String normalizeName(String name) {
   String tempName = "";
   name.split(" ").forEach((element) {
     String namePart = element.toLowerCase();
-    if (namePart != "bin" && namePart != "binti") {
+    if (!["bin", "binti", "b", "bt"].any((word) => namePart == word)) {
       tempName += "${namePart[0].toUpperCase()}${namePart.substring(1)} ";
     } else {
       tempName += "$namePart ";
