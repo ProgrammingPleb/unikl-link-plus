@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:intl/intl.dart';
 import 'package:new_unikl_link/pages/settings.dart';
+import 'package:new_unikl_link/pages/debug/info.dart';
 import 'package:new_unikl_link/types/settings/data.dart';
 import 'package:new_unikl_link/types/settings/reload_data.dart';
 import 'package:new_unikl_link/types/subject.dart';
@@ -215,7 +216,16 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       child: FloatingActionButton.extended(
         heroTag: "Debug",
-        onPressed: null,
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (builder) => DebugInfoPage(
+                storeFuture: widget._store,
+                studentData: studentData,
+              ),
+            ),
+          );
+        },
         icon: const Icon(Icons.science),
         label: Column(children: const [
           Text("Debug Tests"),

@@ -29,6 +29,7 @@ class _AttendanceFailedState extends State<AttendanceFailed> {
               padding: EdgeInsets.only(top: 30),
               child: Text(
                 "Self Attendance Failed",
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
@@ -39,6 +40,7 @@ class _AttendanceFailedState extends State<AttendanceFailed> {
               padding: const EdgeInsets.only(top: 30),
               child: Text(
                 errorMessage,
+                textAlign: TextAlign.center,
               ),
             ),
           ],
