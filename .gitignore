@@ -54,3 +54,6 @@ lib/generated_plugin_registrant.dart
 
 # Visual Studio Code preferences
 /.vscode
+
+generated_plugin*
+GeneratedPlugin*
