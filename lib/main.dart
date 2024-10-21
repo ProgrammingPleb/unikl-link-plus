@@ -64,6 +64,10 @@ class UKLLinkPlusApp extends StatelessWidget {
             snackBarTheme: const SnackBarThemeData(
               behavior: SnackBarBehavior.floating,
             ),
+            pageTransitionsTheme: const PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  TargetPlatform.android: PredictiveBackPageTransitionsBuilder()
+                }),
           ),
           darkTheme: ThemeData(
             colorScheme: darkDynamic ?? _defaultDarkColorScheme,
@@ -71,6 +75,10 @@ class UKLLinkPlusApp extends StatelessWidget {
             snackBarTheme: const SnackBarThemeData(
               behavior: SnackBarBehavior.floating,
             ),
+            pageTransitionsTheme: const PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  TargetPlatform.android: PredictiveBackPageTransitionsBuilder()
+                }),
           ),
           debugShowCheckedModeBanner: false,
           home: MyHomePage(title: 'UniKL Link+'),
