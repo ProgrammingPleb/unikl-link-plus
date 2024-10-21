@@ -4,7 +4,7 @@ String normalizeText(String text) {
   String tempName = "";
   text = text.replaceAll("_", " ");
   text.split(" ").forEach((element) {
-    if (_keepAllCaps.any((word) => element.contains(word))) {
+    if (_keepAllCaps.any((word) => element == word)) {
       tempName += "$element ";
     } else {
       String namePart = element.toLowerCase();
