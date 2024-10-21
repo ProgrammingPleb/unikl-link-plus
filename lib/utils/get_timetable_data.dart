@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:new_unikl_link/server/query.dart';
 import 'package:new_unikl_link/server/urls.dart';
@@ -41,7 +42,11 @@ Future<TimetableData> getTimetableData(SharedPreferences store) {
                   .replaceFirst("|STUDENTID|", store.getString("personID")!)
                   .replaceFirst("|SEMCODE|", semesterData.latest.code)
                   .replaceFirst("|BRANCHCODE|", studentData.branchCode)
-                  .replaceFirst("|WEEK|", currentWeek.number.toString()))))
+                  .replaceFirst(
+                      "|WEEK|",
+                      currentWeek.number
+                          .toString()
+                          .replaceAll("|SEMSET|", semesterData.latest.set)))))
           .then((resp) {
         TimetableData timetableData = TimetableData(jsonDecode(resp.body));
         if (timetableData.days[0].entries.isEmpty) {
