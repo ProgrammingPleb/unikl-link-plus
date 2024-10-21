@@ -109,6 +109,32 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   final ValueNotifier<int> snackMsg = ValueNotifier(0);
   late StudentData studentData;
 
+  void processIntent(rintent.Intent? intent) {
+    const appURI = "uklplus://";
+
+    if (intent != null) {
+      if (intent.data == "${appURI}settings") {
+        Navigator.of(context)
+            .push(MaterialPageRoute<ReloadData>(
+                builder: (context) => SettingsPage(
+                      prevContext: context,
+                      storeFuture: widget.sharedPrefs,
+                      settingsData: settingsData,
+                    )))
+            .then((update) {
+          if (update != null) {
+            if (update.studentProfile) {
+              studentData = update.studentData!;
+            }
+            if (update.debugInterface) {
+              updateDebugInterface();
+            }
+          }
+        });
+      }
+    }
+  }
+
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
@@ -120,14 +146,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         }
       },
     );
+    ReceiveIntent.getInitialIntent().then((intent) => processIntent(intent));
+    ReceiveIntent.receivedIntentStream
+        .listen((intent) => processIntent(intent));
     super.initState();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && name != "Placeholder Name") {
-      updateAtAGlance();
-    }
   }
 
   void showDownloadProgress(int progress, bool displayed) {
