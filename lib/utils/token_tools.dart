@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:new_unikl_link/server/urls.dart';
 import 'package:new_unikl_link/types/auth.dart';
-import 'package:new_unikl_link/types/settings/data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 DateFormat expiryFormat = DateFormat("dd MM yyyy - HH mm", "en-US");
@@ -14,27 +14,16 @@ Future<TokenStatus> checkToken(
   Completer<TokenStatus> c = Completer<TokenStatus>();
   storeFuture ??= SharedPreferences.getInstance();
   ECitieURLs eCitieURL = ECitieURLs();
-  bool tokenExpired = true;
 
   storeFuture.then((store) {
-    if (store.containsKey("tokenExpiry")) {
-      DateTime currentTime = DateTime.now();
-      DateTime expiryTime;
-      try {
-        expiryTime = expiryFormat.parseStrict(store.getString("tokenExpiry")!);
-
-        if (currentTime.isBefore(expiryTime)) {
-          tokenExpired = false;
-        }
-      } catch (e) {
-        tokenExpired = true;
-      }
-    }
-
-    if (tokenExpired || resetCache) {
+    if (resetCache) {
       if (store.containsKey("timetable")) {
         store.remove("timetable");
       }
+      if (!store.containsKey("eCitieToken")) {
+        c.complete(TokenStatus.noKey());
+      }
+    } else {
       if (!store.containsKey("eCitieToken")) {
         c.complete(TokenStatus.noKey());
       } else {
@@ -54,33 +43,15 @@ Future<TokenStatus> checkToken(
               } else {
                 AuthData auth = AuthData.fromJson(jsonDecode(resp.body));
                 store.setString("eCitieToken", auth.eCitieToken);
-                setTokenExpiry(storeFuture: storeFuture);
                 c.complete(TokenStatus.valid());
               }
             });
           } else {
-            setTokenExpiry(storeFuture: storeFuture);
             c.complete(TokenStatus.valid());
           }
         });
       }
-    } else {
-      c.complete(TokenStatus.valid());
     }
-  });
-
-  return c.future;
-}
-
-Future<void> setTokenExpiry({Future<SharedPreferences>? storeFuture}) {
-  Completer<void> c = Completer<void>();
-  storeFuture ??= SharedPreferences.getInstance();
-  storeFuture.then((store) {
-    SettingsData settings = SettingsData.withoutFuture(store);
-    DateTime expiryTime =
-        DateTime.now().add(Duration(hours: settings.tokenRefreshHours));
-
-    store.setString("tokenExpiry", expiryFormat.format(expiryTime));
   });
 
   return c.future;
