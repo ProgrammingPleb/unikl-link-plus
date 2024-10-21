@@ -15,12 +15,12 @@ class LoginPage extends StatefulWidget {
   final bool relogin;
 
   const LoginPage({
-    Key? key,
+    super.key,
     required this.eCitieURL,
     required this.eCitieQ,
     required this.storeFuture,
     this.relogin = false,
-  }) : super(key: key);
+  });
 
   @override
   State<LoginPage> createState() => _LoginPageState();

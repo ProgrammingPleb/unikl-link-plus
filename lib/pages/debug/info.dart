@@ -15,10 +15,10 @@ class DebugInfoPage extends StatefulWidget {
   final StudentData studentData;
 
   const DebugInfoPage({
-    Key? key,
+    super.key,
     required this.storeFuture,
     required this.studentData,
-  }) : super(key: key);
+  });
 
   @override
   State<DebugInfoPage> createState() => _DebugInfoPageState();

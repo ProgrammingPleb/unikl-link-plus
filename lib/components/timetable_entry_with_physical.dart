@@ -8,13 +8,13 @@ class TimetableEntryWithPhysical extends StatelessWidget {
   final String roomCode;
 
   const TimetableEntryWithPhysical({
-    Key? key,
+    super.key,
     required this.startTime,
     required this.endTime,
     required this.subjectCode,
     required this.subjectName,
     required this.roomCode,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

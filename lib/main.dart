@@ -49,7 +49,7 @@ class UKLLinkPlusApp extends StatelessWidget {
   static final _defaultDarkColorScheme = ColorScheme.fromSwatch(
       primarySwatch: Colors.blue, brightness: Brightness.dark);
 
-  const UKLLinkPlusApp({Key? key}) : super(key: key);
+  const UKLLinkPlusApp({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -14,8 +14,10 @@ import 'package:new_unikl_link/types/attendance/entry.dart';
 class AttendanceHistoryPage extends StatefulWidget {
   final Future<SharedPreferences> storeFuture;
 
-  const AttendanceHistoryPage({Key? key, required this.storeFuture})
-      : super(key: key);
+  const AttendanceHistoryPage({
+    super.key,
+    required this.sharedPrefs,
+  });
 
   @override
   State<AttendanceHistoryPage> createState() => _AttendanceHistory();
@@ -162,8 +164,8 @@ class LoadedDataTabs extends StatelessWidget {
 
 class UnloadedBody extends StatelessWidget {
   const UnloadedBody({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -191,16 +193,14 @@ class UnloadedBody extends StatelessWidget {
 }
 
 class LoadedBody extends StatelessWidget {
-  const LoadedBody({
-    Key? key,
-    required TabController tabController,
-    required List<Widget> tabViews,
-  })  : _tabController = tabController,
-        _tabViews = tabViews,
-        super(key: key);
+  final TabController tabController;
+  final List<Widget> tabViews;
 
-  final TabController _tabController;
-  final List<Widget> _tabViews;
+  const LoadedBody({
+    super.key,
+    required this.tabController,
+    required this.tabViews,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -220,10 +220,10 @@ class LoadedBody extends StatelessWidget {
 
 class SubjectTab extends StatelessWidget {
   const SubjectTab({
-    Key? key,
+    super.key,
     required this.subject,
     required this.subjectName,
-  }) : super(key: key);
+  });
 
   final List<AttendanceEntryData> subject;
   final String subjectName;

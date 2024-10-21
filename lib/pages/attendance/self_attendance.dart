@@ -27,12 +27,10 @@ class SelfAttendancePage extends StatelessWidget {
   );
 
   SelfAttendancePage({
-    Key? key,
-    required this.eCitieURL,
-    required this.eCitieQ,
+    super.key,
     required this.studentData,
     required this.storeFuture,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -7,12 +7,12 @@ class TimetableEntryNoPhysical extends StatelessWidget {
   final String subjectName;
 
   const TimetableEntryNoPhysical({
-    Key? key,
+    super.key,
     required this.startTime,
     required this.endTime,
     required this.subjectCode,
     required this.subjectName,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

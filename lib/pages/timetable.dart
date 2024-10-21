@@ -16,8 +16,7 @@ class TimetablePage extends StatefulWidget {
   final Future<SharedPreferences> storeFuture;
   final SettingsData settings;
 
-  TimetablePage({Key? key, required this.storeFuture, required this.settings})
-      : super(key: key);
+  TimetablePage({super.key, required this.storeFuture, required this.settings});
 
   @override
   State<TimetablePage> createState() => _TimetableState();
@@ -179,8 +178,8 @@ class _TimetableState extends State<TimetablePage> {
 
 class UnloadedData extends StatelessWidget {
   const UnloadedData({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -195,10 +194,10 @@ class LoadedData extends StatelessWidget {
   final String? bannerText;
 
   const LoadedData({
-    Key? key,
+    super.key,
     required this.timetableList,
     this.bannerText,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

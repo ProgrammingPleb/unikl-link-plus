@@ -16,11 +16,11 @@ class SettingsPage extends StatefulWidget {
   final SettingsData settingsData;
 
   const SettingsPage({
-    Key? key,
+    super.key,
     required this.prevContext,
     required this.storeFuture,
     required this.settingsData,
-  }) : super(key: key);
+  });
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();

@@ -4,7 +4,7 @@ import 'package:new_unikl_link/types/qr_attendance/response.dart';
 class AttendanceFailed extends StatefulWidget {
   final QRAttendanceResponse qrResp;
 
-  const AttendanceFailed({Key? key, required this.qrResp}) : super(key: key);
+  const AttendanceFailed({super.key, required this.qrResp});
 
   @override
   State<AttendanceFailed> createState() => _AttendanceFailedState();

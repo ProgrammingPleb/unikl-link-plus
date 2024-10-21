@@ -8,11 +8,11 @@ class AttendanceEntry extends StatelessWidget {
   final DateFormat _dateFormat = DateFormat("d MMMM yyyy (EEEE)");
 
   AttendanceEntry({
-    Key? key,
+    super.key,
     required this.date,
     required this.classType,
     required this.attendStatus,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
