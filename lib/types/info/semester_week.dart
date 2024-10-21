@@ -9,7 +9,7 @@ class SemesterWeek {
   late final DateTime endTime;
 
   SemesterWeek(Map<String, dynamic> data) {
-    DateFormat dateFormat = DateFormat("MMM d, yyyy h:mm:ss a");
+    DateFormat dateFormat = DateFormat("MMM d, yyyy, h:mm:ss a");
 
     name = normalizeText(data['SD_EVENT']);
     type = normalizeText(data['SD_EVENT_TYPE']);

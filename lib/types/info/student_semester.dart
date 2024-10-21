@@ -63,7 +63,7 @@ class StudentSemester {
     gpa,
     cgpa,
   }) {
-    DateFormat dateFormat = DateFormat("MMM d, yyyy h:mm:ss a");
+    DateFormat dateFormat = DateFormat("MMM d, yyyy, h:mm:ss a");
     try {
       if (gpa != null) {
         _gpa = double.parse(gpa.toString());
