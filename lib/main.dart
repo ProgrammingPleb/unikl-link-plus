@@ -116,7 +116,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     initData().then(
       (value) {
         if (Platform.isAndroid) {
-          mainCheckUpdates(context, showDownloadProgress, settingsData);
           Future.delayed(const Duration(milliseconds: 250))
               .then((value) => updateDebugInterface());
         }
@@ -441,10 +440,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                                   }
                                   if (update.debugInterface) {
                                     updateDebugInterface();
-                                  }
-                                  if (update.changedVersions) {
-                                    mainCheckUpdates(context,
-                                        showDownloadProgress, settingsData);
                                   }
                                 }
                               });
