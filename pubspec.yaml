@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.0.5+5
+version: 0.0.8+7
 
 environment:
   sdk: ">=2.17.6 <3.0.0"
@@ -35,24 +35,22 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   shared_preferences: ^2.0.15
-  http: ^0.13.5
+  http: ^1.1.2
   dynamic_color: ^1.4.0
-  mobile_scanner: ^3.0.0
-  image_picker: ^0.8.6
-  scan: ^1.6.0
-  intl: ^0.18.0
-  sentry_flutter: ^6.15.1
+  mobile_scanner: ^6.0.1
+  image_picker: ^1.0.5
+  intl: ^0.19.0
+  sentry_flutter: ^8.9.0
   sliver_tools: ^0.2.8
-  package_info_plus: ^3.0.2
+  package_info_plus: ^8.0.3
   path_provider: ^2.0.11
   dio: ^5.0.1
-  flutter_app_installer: ^0.0.3
-  flutter_markdown: ^0.6.14
-  skeletons: ^0.0.3
-  wakelock: ^0.6.2
+  flutter_markdown: ^0.7.4
   crypto: ^3.0.2
   async: any
   convert: ^3.1.1
+  receive_intent: ^0.2.4
+  wakelock_plus: ^1.2.8
 
 dev_dependencies:
   flutter_test:
@@ -63,9 +61,9 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.0
+  flutter_lints: ^5.0.0
 
-  sentry_dart_plugin: ^1.0.0-beta.1
+  sentry_dart_plugin: ^2.1.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -108,3 +106,17 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+sentry:
+  upload_debug_symbols: true
+  upload_source_maps: false
+  upload_sources: false
+  project: unikl-link-plus
+  org: pleb-projects
+  auth_token: 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
+  url: https://pleb-projects.sentry.io/projects/unikl-link-plus/
+  wait_for_processing: false
+  log_level: error
+  commits: auto
+  ignore_missing: true
+
