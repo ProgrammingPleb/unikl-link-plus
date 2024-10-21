@@ -7,7 +7,7 @@ import 'package:new_unikl_link/utils/normalize.dart';
 class AttendanceData {
   Map<String, List<AttendanceEntryData>> _entryData = {};
   Map<String, String> _subjects = {};
-  final DateFormat _dateFormat = DateFormat("MMM d, yyyy h:mm:ss a");
+  final DateFormat _dateFormat = DateFormat("MMM d, yyyy, h:mm:ss a");
 
   AttendanceData(List<dynamic> data) {
     // TODO: Bring subject into it's own type (in info folder) file
