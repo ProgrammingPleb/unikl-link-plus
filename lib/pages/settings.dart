@@ -1,8 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:new_unikl_link/pages/login.dart';
-import 'package:new_unikl_link/server/query.dart';
-import 'package:new_unikl_link/server/urls.dart';
 import 'package:new_unikl_link/types/info/student_profile.dart';
 import 'package:new_unikl_link/types/settings/data.dart';
 import 'package:new_unikl_link/types/settings/reload_data.dart';
@@ -32,12 +30,12 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope<ReloadData?>(
+      onPopInvokedWithResult: (bool didPop, ReloadData? result) async {
         if (!refresh) {
           Navigator.of(context).pop(reloadData);
         }
-        return false;
+        return;
       },
       child: Scaffold(
         body: CustomScrollView(
@@ -56,10 +54,6 @@ class _SettingsPageState extends State<SettingsPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 18),
                   child: Column(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 30),
-                        child: appReleaseBranch(context),
-                      ),
                       Padding(
                         padding: const EdgeInsets.only(bottom: 30),
                         child: tokenRefreshHours(context),
@@ -162,19 +156,14 @@ class _SettingsPageState extends State<SettingsPage> {
           setState(() {
             refresh = true;
           });
-
-          ECitieURLs eCitieURLs = ECitieURLs();
-          ECitieQuery eCitieQuery = ECitieQuery();
           checkToken(storeFuture: widget.storeFuture, resetCache: true)
               .then((status) {
-            if (!status.valid) {
+            if (!status.valid && context.mounted) {
               if (status.needsRelogin) {
                 Navigator.push(
                   context,
                   MaterialPageRoute<StudentData>(
                     builder: (context) => LoginPage(
-                      eCitieURL: eCitieURLs,
-                      eCitieQ: eCitieQuery,
                       storeFuture: widget.storeFuture,
                       relogin: true,
                     ),
@@ -188,8 +177,6 @@ class _SettingsPageState extends State<SettingsPage> {
                   context,
                   MaterialPageRoute<StudentData>(
                     builder: (context) => LoginPage(
-                      eCitieURL: eCitieURLs,
-                      eCitieQ: eCitieQuery,
                       storeFuture: widget.storeFuture,
                     ),
                   ),

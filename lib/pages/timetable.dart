@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:new_unikl_link/components/timetable_entry_no_physical.dart';
 import 'package:new_unikl_link/components/timetable_entry_with_physical.dart';
@@ -23,7 +24,6 @@ class TimetablePage extends StatefulWidget {
 }
 
 class _TimetableState extends State<TimetablePage> {
-  bool _loading = true;
   bool _semBreak = false;
   bool _finalExam = false;
   String? _bannerText;
@@ -127,7 +127,6 @@ class _TimetableState extends State<TimetablePage> {
       }
 
       setState(() {
-        _loading = false;
         currentView = LoadedData(
           timetableList: timetableList,
           bannerText: _bannerText,
@@ -140,38 +139,21 @@ class _TimetableState extends State<TimetablePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) => [
-          SliverAppBar.large(
-            floating: true,
-            title: const Padding(
-              padding: EdgeInsets.only(left: 15),
-              child: Text(
-                "Student Timetable",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+    return Stack(
+      children: [
+        currentView,
+        Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: const EdgeInsets.only(right: 20, bottom: 20),
+            child: FloatingActionButton.extended(
+              onPressed: () {},
+              label: Text("Refresh"),
+              icon: Icon(Icons.refresh),
             ),
-            actions: [
-              if (_loading) ...[
-                const Padding(
-                  padding: EdgeInsets.only(right: 15),
-                  child: Center(
-                    child: SizedBox(
-                      width: 25,
-                      height: 25,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                      ),
-                    ),
-                  ),
-                )
-              ],
-            ],
           ),
-        ],
-        body: currentView,
-      ),
+        ),
+      ],
     );
   }
 }
@@ -261,6 +243,14 @@ class LoadedData extends StatelessWidget {
                 )
               ],
               ...timetableList,
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Center(
+                  child: Text(
+                    "End of Week",
+                  ),
+                ),
+              ),
             ],
           ),
         ),

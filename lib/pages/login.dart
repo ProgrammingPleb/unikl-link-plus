@@ -1,23 +1,19 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:new_unikl_link/server/query.dart';
+import 'package:new_unikl_link/server/urls.dart';
 import 'package:new_unikl_link/types/auth.dart';
 import 'package:new_unikl_link/types/info/student_profile.dart';
-import 'package:new_unikl_link/utils/token_tools.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'package:new_unikl_link/server/urls.dart';
 
 class LoginPage extends StatefulWidget {
-  final ECitieURLs eCitieURL;
-  final ECitieQuery eCitieQ;
   final Future<SharedPreferences> storeFuture;
   final bool relogin;
 
   const LoginPage({
     super.key,
-    required this.eCitieURL,
-    required this.eCitieQ,
     required this.storeFuture,
     this.relogin = false,
   });
@@ -27,6 +23,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final ECitieURLs eCitieURL = ECitieURLs();
+  final ECitieQuery eCitieQ = ECitieQuery();
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -35,11 +33,13 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     if (widget.relogin) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content:
-              Text("Invalid saved credentials! Please re-enter your current "
-                  "login credentials.")));
+      Future.delayed(Duration(milliseconds: 500), () {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content:
+                Text("Invalid saved credentials! Please re-enter your current "
+                    "login credentials.")));
+      });
     }
   }
 
@@ -53,8 +53,8 @@ class _LoginPageState extends State<LoginPage> {
           currentFocus.unfocus();
         }
       },
-      child: WillPopScope(
-        onWillPop: () async => false,
+      child: PopScope(
+        canPop: false,
         child: Scaffold(
             appBar: AppBar(
               title: const Text("UniKL eCitie Login"),
@@ -96,7 +96,7 @@ class _LoginPageState extends State<LoginPage> {
                               obscureText: true,
                               decoration: const InputDecoration(
                                 border: OutlineInputBorder(),
-                                labelText: "Password",
+                                labelText: "eCitie Password",
                               ),
                               autofillHints: const [AutofillHints.password],
                               validator: (value) {
@@ -118,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           http
-                              .get(Uri.parse(widget.eCitieURL.auth(
+                              .get(Uri.parse(eCitieURL.auth(
                                   usernameController.text,
                                   passwordController.text)))
                               .then((resp) {
@@ -134,11 +134,11 @@ class _LoginPageState extends State<LoginPage> {
                             } else {
                               AuthData auth = AuthData.fromJson(json);
                               http
-                                  .get(Uri.parse(widget.eCitieURL.serverQuery(
+                                  .get(Uri.parse(eCitieURL.serverQuery(
                                       auth.eCitieToken,
-                                      widget.eCitieQ.studentProfile
-                                          .replaceFirst("|STAFFEMAIL|",
-                                              usernameController.text))))
+                                      eCitieQ.studentProfile.replaceFirst(
+                                          "|STAFFEMAIL|",
+                                          usernameController.text))))
                                   .then((resp) {
                                 List rawResp = jsonDecode(resp.body);
                                 StudentData studentData =
@@ -160,8 +160,6 @@ class _LoginPageState extends State<LoginPage> {
                                         "password", passwordController.text);
                                     store.setString(
                                         "profile", studentData.toJson());
-                                    setTokenExpiry(
-                                        storeFuture: widget.storeFuture);
                                     FocusScopeNode currentFocus =
                                         FocusScope.of(context);
 

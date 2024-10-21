@@ -2,21 +2,24 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:new_unikl_link/pages/attendance/self_attendance.dart';
 import 'package:new_unikl_link/server/query.dart';
 import 'package:new_unikl_link/server/urls.dart';
 import 'package:new_unikl_link/types/attendance/data.dart';
+import 'package:new_unikl_link/types/info/student_profile.dart';
 import 'package:new_unikl_link/types/info/student_semester.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sliver_tools/sliver_tools.dart';
 import 'package:new_unikl_link/components/attendance_entry.dart';
 import 'package:new_unikl_link/types/attendance/entry.dart';
 
 class AttendanceHistoryPage extends StatefulWidget {
-  final Future<SharedPreferences> storeFuture;
+  final Future<SharedPreferences> sharedPrefs;
+  final StudentData studentData;
 
   const AttendanceHistoryPage({
     super.key,
     required this.sharedPrefs,
+    required this.studentData,
   });
 
   @override
@@ -25,7 +28,9 @@ class AttendanceHistoryPage extends StatefulWidget {
 
 class _AttendanceHistory extends State<AttendanceHistoryPage>
     with SingleTickerProviderStateMixin {
+  // ignore: prefer_final_fields
   List<String> _tabs = [];
+  // ignore: prefer_final_fields
   List<Widget> _tabViews = [];
   late final TabController _tabController;
   final ECitieURLs _eCitieURLs = ECitieURLs();
@@ -34,7 +39,7 @@ class _AttendanceHistory extends State<AttendanceHistoryPage>
 
   @override
   void initState() {
-    widget.storeFuture.then((store) {
+    widget.sharedPrefs.then((store) {
       http
           .get(Uri.parse(_eCitieURLs.serverQuery(
               store.getString("eCitieToken")!,
@@ -83,81 +88,36 @@ class _AttendanceHistory extends State<AttendanceHistoryPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) => [
-          SliverOverlapAbsorber(
-            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-            sliver: SliverSafeArea(
-                top: false,
-                sliver: MultiSliver(children: [
-                  SliverAppBar.large(
-                    floating: true,
-                    title: const Text(
-                      "Attendance History",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    actions: [
-                      if (!_dataLoaded) ...[
-                        const Padding(
-                          padding: EdgeInsets.only(right: 15),
-                          child: Center(
-                            child: SizedBox(
-                              width: 25,
-                              height: 25,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 3,
-                              ),
-                            ),
-                          ),
-                        )
-                      ],
-                    ],
-                  ),
-                  if (_dataLoaded) ...[
-                    LoadedDataTabs(tabController: _tabController, tabs: _tabs)
-                  ]
-                ])),
-          )
-        ],
-        body: _dataLoaded
-            ? LoadedBody(tabController: _tabController, tabViews: _tabViews)
+    return Stack(
+      children: [
+        _dataLoaded
+            ? LoadedBody(
+                tabController: _tabController,
+                tabNames: _tabs,
+                tabViews: _tabViews,
+              )
             : const UnloadedBody(),
-      ),
-    );
-  }
-}
-
-class LoadedDataTabs extends StatelessWidget {
-  const LoadedDataTabs({
-    Key? key,
-    required TabController tabController,
-    required List tabs,
-  })  : _tabController = tabController,
-        _tabs = tabs,
-        super(key: key);
-
-  final TabController _tabController;
-  final List _tabs;
-
-  @override
-  Widget build(BuildContext context) {
-    return SliverPersistentHeader(
-      delegate: _SliverAppBarDelegate(TabBar(
-        controller: _tabController,
-        isScrollable: true,
-        indicatorColor: Theme.of(context).colorScheme.primary,
-        tabs: [
-          ..._tabs.map((e) => Tab(
-                child: Text(
-                  e,
-                  style: TextStyle(
-                      color: Theme.of(context).colorScheme.onBackground),
-                ),
-              ))
-        ],
-      )),
-      pinned: true,
+        Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: const EdgeInsets.only(right: 20, bottom: 20),
+            child: FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => SelfAttendancePage(
+                      studentData: widget.studentData,
+                      storeFuture: widget.sharedPrefs,
+                    ),
+                  ),
+                );
+              },
+              label: Text("Self Attendance"),
+              icon: Icon(Icons.qr_code),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -169,52 +129,56 @@ class UnloadedBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      bottom: false,
-      child: Builder(builder: (context) {
-        return CustomScrollView(
-          slivers: [
-            SliverOverlapInjector(
-                handle:
-                    NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
-            const SliverPadding(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              sliver: SliverToBoxAdapter(
-                  child: Center(
-                child: Text("Loading Attendance Data..."),
-              )),
-            )
-          ],
-        );
-      }),
+    return Center(
+      child: Text("Loading Attendance Data..."),
     );
   }
 }
 
 class LoadedBody extends StatelessWidget {
   final TabController tabController;
+  final List<String> tabNames;
   final List<Widget> tabViews;
 
   const LoadedBody({
     super.key,
     required this.tabController,
+    required this.tabNames,
     required this.tabViews,
   });
 
   @override
   Widget build(BuildContext context) {
-    return TabBarView(controller: _tabController, children: [
-      ..._tabViews.map((tabView) {
-        return SafeArea(
-          top: false,
-          bottom: false,
-          child: Builder(builder: (context) {
-            return tabView;
-          }),
-        );
-      })
-    ]);
+    return Column(
+      children: [
+        TabBar(
+          controller: tabController,
+          tabAlignment: TabAlignment.start,
+          isScrollable: true,
+          tabs: List<Widget>.from(
+            tabNames.map(
+              (name) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text(name),
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: TabBarView(controller: tabController, children: [
+            ...tabViews.map((tabView) {
+              return SafeArea(
+                top: false,
+                bottom: false,
+                child: Builder(builder: (context) {
+                  return tabView;
+                }),
+              );
+            })
+          ]),
+        ),
+      ],
+    );
   }
 }
 
@@ -232,8 +196,6 @@ class SubjectTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: [
-        SliverOverlapInjector(
-            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           sliver: SliverList(
@@ -259,35 +221,5 @@ class SubjectTab extends StatelessWidget {
         )
       ],
     );
-  }
-}
-
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  _SliverAppBarDelegate(this._tabBar);
-
-  final TabBar _tabBar;
-
-  @override
-  double get minExtent => _tabBar.preferredSize.height;
-  @override
-  double get maxExtent => _tabBar.preferredSize.height;
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      decoration: BoxDecoration(
-          color: overlapsContent
-              ? Color.alphaBlend(
-                  Theme.of(context).colorScheme.surfaceTint.withAlpha(20),
-                  Theme.of(context).colorScheme.surface)
-              : Theme.of(context).colorScheme.surface),
-      child: _tabBar,
-    );
-  }
-
-  @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
-    return true;
   }
 }

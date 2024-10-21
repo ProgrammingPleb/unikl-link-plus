@@ -1,21 +1,21 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:scan/scan.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:new_unikl_link/pages/attendance/failed.dart';
-import 'package:new_unikl_link/types/qr_attendance/data.dart';
-import 'package:new_unikl_link/types/qr_attendance/response.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:new_unikl_link/pages/attendance/success.dart';
 import 'package:new_unikl_link/server/query.dart';
 import 'package:new_unikl_link/server/urls.dart';
 import 'package:new_unikl_link/types/info/student_profile.dart';
+import 'package:new_unikl_link/types/qr_attendance/data.dart';
+import 'package:new_unikl_link/types/qr_attendance/response.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SelfAttendancePage extends StatelessWidget {
-  final ECitieURLs eCitieURL;
-  final ECitieQuery eCitieQ;
+  final ECitieURLs eCitieURL = ECitieURLs();
+  final ECitieQuery eCitieQ = ECitieQuery();
   final StudentData studentData;
   final Future<SharedPreferences> storeFuture;
   final MobileScannerController controller = MobileScannerController(
@@ -34,6 +34,45 @@ class SelfAttendancePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    void processQR(List<Barcode> barcodes) {
+      if (barcodes == [] || barcodes[0].rawValue == null) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Unable to scan the QR code, please try again!"),
+          ),
+        );
+      } else {
+        QRAttendanceData qr =
+            QRAttendanceData.fromJson(jsonDecode(barcodes[0].rawValue!));
+        storeFuture.then((store) {
+          http.post(
+            Uri.parse(eCitieURL.selfAttendance(qr.session, qr.datetime,
+                store.getString("eCitieToken")!, studentData.id)),
+            headers: {"content-type": "application/x-www-form-urlencoded"},
+          ).then((resp) {
+            QRAttendanceResponse qrResp =
+                QRAttendanceResponse.fromJson(jsonDecode(resp.body));
+            if (qrResp.status == "0") {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(
+                      builder: (context) => AttendanceFailed(
+                            qrResp: qrResp,
+                          )))
+                  .then((value) => Navigator.of(context).pop());
+            } else {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(
+                      builder: (context) => AttendanceSuccess(
+                            qrResp: qrResp,
+                          )))
+                  .then((value) => Navigator.of(context).pop());
+            }
+          });
+        });
+      }
+    }
+
     return Scaffold(
         body: CustomScrollView(
       physics: const NeverScrollableScrollPhysics(),
@@ -68,53 +107,7 @@ class SelfAttendancePage extends StatelessWidget {
                       controller: controller,
                       fit: BoxFit.cover,
                       onDetect: ((capture) {
-                        if (capture.barcodes == [] ||
-                            capture.barcodes[0].rawValue == null) {
-                          ScaffoldMessenger.of(context).clearSnackBars();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  "Unable to scan the QR code, please try again!"),
-                            ),
-                          );
-                        } else {
-                          QRAttendanceData qr = QRAttendanceData.fromJson(
-                              jsonDecode(capture.barcodes[0].rawValue!));
-                          storeFuture.then((store) {
-                            http.post(
-                              Uri.parse(eCitieURL.selfAttendance(
-                                  qr.session,
-                                  qr.datetime,
-                                  store.getString("eCitieToken")!,
-                                  studentData.id)),
-                              headers: {
-                                "content-type":
-                                    "application/x-www-form-urlencoded"
-                              },
-                            ).then((resp) {
-                              QRAttendanceResponse qrResp =
-                                  QRAttendanceResponse.fromJson(
-                                      jsonDecode(resp.body));
-                              if (qrResp.status == "0") {
-                                Navigator.of(context)
-                                    .push(MaterialPageRoute(
-                                        builder: (context) => AttendanceFailed(
-                                              qrResp: qrResp,
-                                            )))
-                                    .then(
-                                        (value) => Navigator.of(context).pop());
-                              } else {
-                                Navigator.of(context)
-                                    .push(MaterialPageRoute(
-                                        builder: (context) => AttendanceSuccess(
-                                              qrResp: qrResp,
-                                            )))
-                                    .then(
-                                        (value) => Navigator.of(context).pop());
-                              }
-                            });
-                          });
-                        }
+                        processQR(capture.barcodes);
                       }),
                     ),
                   ),
@@ -125,57 +118,20 @@ class SelfAttendancePage extends StatelessWidget {
                         final ImagePicker imagePicker = ImagePicker();
                         imagePicker
                             .pickImage(source: ImageSource.gallery)
-                            .then((image) {
+                            .then((image) async {
                           if (image != null) {
-                            Scan.parse(image.path).then((qrData) {
-                              if (qrData != null) {
-                                QRAttendanceData qr = QRAttendanceData.fromJson(
-                                    jsonDecode(qrData));
-                                storeFuture.then((store) {
-                                  http.post(
-                                    Uri.parse(eCitieURL.selfAttendance(
-                                        qr.session,
-                                        qr.datetime,
-                                        store.getString("eCitieToken")!,
-                                        studentData.id)),
-                                    headers: {
-                                      "content-type":
-                                          "application/x-www-form-urlencoded"
-                                    },
-                                  ).then((resp) {
-                                    QRAttendanceResponse qrResp =
-                                        QRAttendanceResponse.fromJson(
-                                            jsonDecode(resp.body));
-                                    if (qrResp.status == "0") {
-                                      Navigator.of(context)
-                                          .push(MaterialPageRoute(
-                                              builder: (context) =>
-                                                  AttendanceFailed(
-                                                    qrResp: qrResp,
-                                                  )))
-                                          .then((value) =>
-                                              Navigator.of(context).pop());
-                                    } else {
-                                      Navigator.of(context)
-                                          .push(MaterialPageRoute(
-                                              builder: (context) =>
-                                                  AttendanceSuccess(
-                                                    qrResp: qrResp,
-                                                  )))
-                                          .then((value) =>
-                                              Navigator.of(context).pop());
-                                    }
-                                  });
-                                });
-                              } else {
-                                ScaffoldMessenger.of(context).clearSnackBars();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text(
-                                            "Unable to process the attendance "
-                                            "QR code!")));
-                              }
-                            });
+                            BarcodeCapture? qrData =
+                                await controller.analyzeImage(image.path);
+                            if (qrData != null) {
+                              processQR(qrData.barcodes);
+                            } else {
+                              ScaffoldMessenger.of(context).clearSnackBars();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          "Unable to process the attendance "
+                                          "QR code!")));
+                            }
                           }
                         });
                       },

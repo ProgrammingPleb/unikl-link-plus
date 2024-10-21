@@ -6,6 +6,7 @@ class Subject {
   final bool online;
   final DateTime startTime;
   final DateTime endTime;
+  int followingDay;
   bool followingWeek;
 
   Subject({
@@ -16,6 +17,7 @@ class Subject {
     required this.startTime,
     required this.endTime,
     this.followingWeek = false,
+    this.followingDay = 0,
   }) {
     if (roomCode.length == 3) {
       roomLevel = roomCode.substring(0, 1);
@@ -24,7 +26,25 @@ class Subject {
     }
   }
 
+  factory Subject.empty() {
+    return Subject(
+      name: "Placeholder Name",
+      code: "XXX0000",
+      roomCode: "1801",
+      online: true,
+      startTime: DateTime(1970),
+      endTime: DateTime(1970),
+    );
+  }
+
   String getFormattedDuration([bool markdown = false]) {
+    if (followingDay > 0) {
+      if (followingDay == 1) {
+        return "starts in 1 day";
+      }
+      return "starts in $followingDay days";
+    }
+
     if (followingWeek) {
       return "starts next week";
     }

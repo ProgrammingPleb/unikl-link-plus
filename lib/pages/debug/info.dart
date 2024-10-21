@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
@@ -123,10 +124,10 @@ class _DebugInfoPageState extends State<DebugInfoPage> {
 
   void semesterColumn() async {
     semesterColumnList.add(
-      Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
+      const Padding(
+        padding: EdgeInsets.only(bottom: 8.0),
         child: Column(
-          children: const [
+          children: [
             Text(
               "Semester Details",
               style: TextStyle(
