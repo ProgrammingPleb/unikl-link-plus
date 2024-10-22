@@ -148,6 +148,7 @@ class _TimetableState extends State<TimetablePage> {
             padding: const EdgeInsets.only(right: 20, bottom: 20),
             child: FloatingActionButton.extended(
               onPressed: () {},
+              heroTag: "RefreshTimetable",
               label: Text("Refresh"),
               icon: Icon(Icons.refresh),
             ),

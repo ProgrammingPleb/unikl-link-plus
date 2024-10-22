@@ -112,6 +112,7 @@ class _AttendanceHistory extends State<AttendanceHistoryPage>
                   ),
                 );
               },
+              heroTag: "SelfAtt",
               label: Text("Self Attendance"),
               icon: Icon(Icons.qr_code),
             ),
