@@ -1,17 +1,102 @@
 import 'package:flutter/material.dart';
 import 'package:new_unikl_link/components/menu_entry.dart';
+import 'package:new_unikl_link/pages/login.dart';
+import 'package:new_unikl_link/pages/settings.dart';
+import 'package:new_unikl_link/types/info/student_profile.dart';
+import 'package:new_unikl_link/types/settings/data.dart';
+import 'package:new_unikl_link/types/settings/reload_data.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MoreActionsPage extends StatelessWidget {
-  const MoreActionsPage({super.key});
+  final Future<SharedPreferences> sharedPrefs;
+  final SettingsData settingsData;
+  final void Function() onLogout;
+  final void Function() onLogin;
+
+  const MoreActionsPage({
+    super.key,
+    required this.sharedPrefs,
+    required this.settingsData,
+    required this.onLogout,
+    required this.onLogin,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.max,
       children: [
-        MenuEntry(icon: Icons.settings, label: "Settings"),
+        MenuEntry(
+          icon: Icons.settings,
+          label: "Settings",
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<ReloadData>(
+              builder: (context) => SettingsPage(
+                prevContext: context,
+                storeFuture: sharedPrefs,
+                settingsData: settingsData,
+              ),
+            ),
+          ),
+        ),
         SizedBox(height: 8),
-        MenuEntry(icon: Icons.exit_to_app, label: "Log Out"),
+        MenuEntry(
+          icon: Icons.exit_to_app,
+          label: "Log Out",
+          style: FilledButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.errorContainer,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          iconColor: Theme.of(context).colorScheme.error,
+          textStyle: TextStyle(
+            color: Theme.of(context).colorScheme.error,
+          ),
+          onPressed: () {
+            showDialog(
+                context: context,
+                builder: ((context) => AlertDialog(
+                      title: const Text("Logging Out"),
+                      content: const Text("Are you sure you want to log out?"),
+                      actions: [
+                        TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text("Cancel")),
+                        TextButton(
+                          onPressed: () {
+                            sharedPrefs.then(
+                              (store) {
+                                store.remove("timetable");
+                                store.remove("eCitieToken");
+                                store.remove("o365AccessToken");
+                                store.remove("o365RefreshToken");
+                                store.remove("o365TokenExpiryTime");
+                                store.remove("personID");
+                                store.remove("username");
+                                store.remove("password");
+                                store.remove("profile");
+                              },
+                            );
+                            Navigator.of(context).pop();
+                            Navigator.of(context)
+                                .push(
+                              MaterialPageRoute<StudentData>(
+                                builder: (context) =>
+                                    LoginPage(storeFuture: sharedPrefs),
+                              ),
+                            )
+                                .then((_) {
+                              onLogin();
+                            });
+                            onLogout();
+                          },
+                          child: const Text("Confirm"),
+                        )
+                      ],
+                    )));
+          },
+        ),
       ],
     );
   }

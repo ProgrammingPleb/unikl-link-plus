@@ -60,10 +60,6 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.only(bottom: 30),
-                        child: atAGlance(context),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 30),
                         child: fastingTimetable(context),
                       ),
                       ...enableDebug(context),
@@ -234,50 +230,6 @@ class _SettingsPageState extends State<SettingsPage> {
           ],
         ),
         resetElement(),
-      ],
-    );
-  }
-
-  Row atAGlance(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.only(bottom: 2),
-              child: Text(
-                "Show \"At a Glance\"",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            Text(
-              "Displays info about the next subject",
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            Text(
-              "on the front page.",
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-        Switch(
-          thumbIcon: switchIcons,
-          value: widget.settingsData.atAGlanceEnabled,
-          onChanged: (value) {
-            setState(() {
-              reloadData.atAGlance = true;
-              widget.settingsData.atAGlanceEnabled = value;
-            });
-          },
-        ),
       ],
     );
   }

@@ -15,10 +15,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   final Future<SharedPreferences> sharedPrefs;
+  final void Function(StudentData data) onReceiveStudentData;
+  final bool Function() logoutCheck;
 
   const HomePage({
     super.key,
     required this.sharedPrefs,
+    required this.onReceiveStudentData,
+    required this.logoutCheck,
   });
 
   @override
@@ -34,31 +38,45 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   bool loaded = false;
   late StudentData studentData;
   late SettingsData settingsData;
+  Timer? timeTimer;
+  Timer? subjectTimer;
 
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
-    initData().then((_) {
-      setState(() {
-        loaded = true;
-      });
+    initData().then((loggedIn) async {
       updateTime();
-      updateNextClass();
-
-      Timer.periodic(Duration(milliseconds: 500), (timer) {
+      timeTimer = Timer.periodic(Duration(milliseconds: 500), (timer) {
         if (mounted) {
           setState(() {
             updateTime();
           });
         }
       });
-      Timer.periodic(Duration(seconds: 5), (timer) {
-        if (mounted) {
-          setState(() {
-            updateNextClass();
-          });
-        }
+
+      setState(() {
+        loaded = true;
       });
+      if (loggedIn) {
+        updateNextClass();
+        subjectTimer = Timer.periodic(Duration(seconds: 5), (timer) {
+          if (mounted) {
+            setState(() {
+              updateNextClass();
+            });
+          }
+        });
+      }
+      bool tokenValid = await checkLogin();
+      if (tokenValid && !loggedIn) {
+        subjectTimer = Timer.periodic(Duration(seconds: 5), (timer) {
+          if (mounted) {
+            setState(() {
+              updateNextClass();
+            });
+          }
+        });
+      }
     });
     super.initState();
   }
@@ -73,7 +91,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     }
   }
 
+  @override
+  void dispose() {
+    timeTimer?.cancel();
+    subjectTimer?.cancel();
+    super.dispose();
+  }
+
   void updateTime() {
+    if (widget.logoutCheck()) {
+      timeTimer?.cancel();
+      subjectTimer?.cancel();
+    }
     date = currentTimeFormat.format(DateTime.now());
   }
 
@@ -92,19 +121,25 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     });
   }
 
-  Future<void> initData() async {
+  Future<bool> initData() async {
     SharedPreferences store = await widget.sharedPrefs;
     settingsData = SettingsData.withoutFuture(store);
     if (store.containsKey("profile")) {
       studentData =
           StudentData.fromJson(jsonDecode(store.getString("profile")!));
+      widget.onReceiveStudentData(studentData);
       updateUserDetails(studentData.normalizeName(), studentData.id);
+      return true;
     }
+    return false;
+  }
 
+  Future<bool> checkLogin() async {
     TokenStatus status = await checkToken(storeFuture: widget.sharedPrefs);
     if (!status.valid && mounted) {
+      StudentData? data;
       if (status.needsRelogin) {
-        Navigator.push(
+        data = await Navigator.push(
           context,
           MaterialPageRoute<StudentData>(
             builder: (context) => LoginPage(
@@ -112,28 +147,26 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               relogin: true,
             ),
           ),
-        ).then((data) {
-          studentData = data!;
-          updateUserDetails(data.normalizeName(), data.id);
-        });
+        );
       } else {
-        Navigator.push(
+        data = await Navigator.push(
           context,
           MaterialPageRoute<StudentData>(
             builder: (context) => LoginPage(
               storeFuture: widget.sharedPrefs,
             ),
           ),
-        ).then((data) {
-          studentData = data!;
-          updateUserDetails(data.normalizeName(), data.id);
-        });
+        );
       }
-    } else {
-      studentData =
-          StudentData.fromJson(jsonDecode(store.getString("profile")!));
-      updateUserDetails(studentData.normalizeName(), studentData.id);
+
+      if (data != null) {
+        widget.onReceiveStudentData(data);
+        updateUserDetails(data.name, data.id);
+        updateNextClass();
+        return true;
+      }
     }
+    return false;
   }
 
   @override

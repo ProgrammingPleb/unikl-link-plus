@@ -1,16 +1,12 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:new_unikl_link/components/menu_entry.dart';
 import 'package:new_unikl_link/pages/attendance/history.dart';
-import 'package:new_unikl_link/pages/attendance/self_attendance.dart';
 import 'package:new_unikl_link/pages/debug/info.dart';
 import 'package:new_unikl_link/pages/home.dart';
-import 'package:new_unikl_link/pages/login.dart';
 import 'package:new_unikl_link/pages/more.dart';
 import 'package:new_unikl_link/pages/settings.dart';
 import 'package:new_unikl_link/pages/timetable.dart';
@@ -19,7 +15,6 @@ import 'package:new_unikl_link/server/urls.dart';
 import 'package:new_unikl_link/types/info/student_profile.dart';
 import 'package:new_unikl_link/types/settings/data.dart';
 import 'package:new_unikl_link/types/settings/reload_data.dart';
-import 'package:new_unikl_link/utils/token_tools.dart';
 import 'package:receive_intent/receive_intent.dart' as rintent;
 import 'package:receive_intent/receive_intent.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -108,6 +103,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   final ValueNotifier<int> snackMsg = ValueNotifier(0);
   late StudentData studentData;
   int pageIndex = 0;
+  bool hasLoggedOut = false;
 
   void processIntent(rintent.Intent? intent) {
     const appURI = "uklplus://";
@@ -141,20 +137,25 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     pages = [
       Padding(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-        child: HomePage(sharedPrefs: widget.sharedPrefs),
+        child: HomePage(
+          sharedPrefs: widget.sharedPrefs,
+          onReceiveStudentData: (data) {
+            studentData = data;
+          },
+          logoutCheck: () => hasLoggedOut,
+        ),
       ),
       SizedBox(),
       SizedBox(),
       SizedBox(),
     ];
-    initData().then(
-      (value) {
+    widget.sharedPrefs.then((store) {
+      settingsData = SettingsData.withoutFuture(store);
+    });
         if (Platform.isAndroid) {
-          Future.delayed(const Duration(milliseconds: 250))
+      Future.delayed(const Duration(milliseconds: 1000))
               .then((value) => updateDebugInterface());
         }
-      },
-    );
     ReceiveIntent.getInitialIntent().then((intent) => processIntent(intent));
     ReceiveIntent.receivedIntentStream
         .listen((intent) => processIntent(intent));
@@ -513,7 +514,38 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               case 3:
                 pages[tab] = Padding(
                   padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-                  child: MoreActionsPage(),
+                  child: MoreActionsPage(
+                    sharedPrefs: widget.sharedPrefs,
+                    settingsData: settingsData,
+                    onLogout: () {
+                      pageIndex = 0;
+                      pages = [
+                        SizedBox(),
+                        SizedBox(),
+                        SizedBox(),
+                        SizedBox(),
+                      ];
+                      hasLoggedOut = true;
+                    },
+                    onLogin: () {
+                      pages = [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                          child: HomePage(
+                            sharedPrefs: widget.sharedPrefs,
+                            onReceiveStudentData: (data) {
+                              studentData = data;
+                            },
+                            logoutCheck: () => hasLoggedOut,
+                          ),
+                        ),
+                        SizedBox(),
+                        SizedBox(),
+                        SizedBox(),
+                      ];
+                      hasLoggedOut = false;
+                    },
+                  ),
                 );
                 break;
             }
