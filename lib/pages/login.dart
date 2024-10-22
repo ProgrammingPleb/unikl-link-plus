@@ -34,11 +34,13 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     if (widget.relogin) {
       Future.delayed(Duration(milliseconds: 500), () {
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content:
-                Text("Invalid saved credentials! Please re-enter your current "
-                    "login credentials.")));
+        if (mounted) {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text(
+                  "Invalid saved credentials! Please re-enter your current "
+                  "login credentials.")));
+        }
       });
     }
   }
@@ -123,7 +125,7 @@ class _LoginPageState extends State<LoginPage> {
                                   passwordController.text)))
                               .then((resp) {
                             Map<String, dynamic> json = jsonDecode(resp.body);
-                            if (json["status"] == "0") {
+                            if (json["status"] == "0" && context.mounted) {
                               ScaffoldMessenger.of(context).clearSnackBars();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -160,14 +162,14 @@ class _LoginPageState extends State<LoginPage> {
                                         "password", passwordController.text);
                                     store.setString(
                                         "profile", studentData.toJson());
-                                    FocusScopeNode currentFocus =
-                                        FocusScope.of(context);
-
-                                    if (!currentFocus.hasPrimaryFocus) {
-                                      currentFocus.unfocus();
+                                    if (context.mounted) {
+                                      FocusScopeNode currentFocus =
+                                          FocusScope.of(context);
+                                      if (!currentFocus.hasPrimaryFocus) {
+                                        currentFocus.unfocus();
+                                      }
+                                      Navigator.of(context).pop(studentData);
                                     }
-
-                                    Navigator.of(context).pop(studentData);
                                   },
                                 );
                               });
