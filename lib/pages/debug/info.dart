@@ -140,9 +140,12 @@ class _DebugInfoPageState extends State<DebugInfoPage> {
 
     int semesterIndex = 1;
     SharedPreferences store = await widget.sharedPrefs;
-        store.getString("eCitieToken")!,
-        eCitieQuery.semesterData
-            .replaceAll("|STUDENTID|", widget.studentData.id))));
+    http.Response resp = await eCitieURLs.sendQuery(
+        widget.sharedPrefs,
+        eCitieQuery.buildQuery(
+            store.getString("eCitieToken")!,
+            eCitieQuery.semesterData
+                .replaceAll("|STUDENTID|", widget.studentData.id)));
     semesterData = StudentSemesterData(jsonDecode(resp.body));
     for (StudentSemester semester in semesterData.semesters.reversed) {
       semesterColumnList.add(
