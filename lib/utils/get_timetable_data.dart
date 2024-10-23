@@ -14,6 +14,7 @@ Future<TimetableData> getTimetableData(SharedPreferences store) {
   Completer<TimetableData> c = Completer<TimetableData>();
   ECitieURLs eCitieURL = ECitieURLs();
   ECitieQuery eCitieQ = ECitieQuery();
+  SharedPreferences store = await sharedPrefs;
 
   StudentData studentData =
       StudentData.fromJson(jsonDecode(store.getString("profile")!));

@@ -33,7 +33,7 @@ class MoreActionsPage extends StatelessWidget {
             MaterialPageRoute<ReloadData>(
               builder: (context) => SettingsPage(
                 prevContext: context,
-                storeFuture: sharedPrefs,
+                sharedPrefs: sharedPrefs,
                 settingsData: settingsData,
               ),
             ),
@@ -83,7 +83,7 @@ class MoreActionsPage extends StatelessWidget {
                                 .push(
                               MaterialPageRoute<StudentData>(
                                 builder: (context) =>
-                                    LoginPage(storeFuture: sharedPrefs),
+                                    LoginPage(sharedPrefs: sharedPrefs),
                               ),
                             )
                                 .then((_) {

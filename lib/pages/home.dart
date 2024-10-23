@@ -143,7 +143,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           context,
           MaterialPageRoute<StudentData>(
             builder: (context) => LoginPage(
-              storeFuture: widget.sharedPrefs,
+              sharedPrefs: widget.sharedPrefs,
               relogin: true,
             ),
           ),
@@ -153,7 +153,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           context,
           MaterialPageRoute<StudentData>(
             builder: (context) => LoginPage(
-              storeFuture: widget.sharedPrefs,
+              sharedPrefs: widget.sharedPrefs,
             ),
           ),
         );

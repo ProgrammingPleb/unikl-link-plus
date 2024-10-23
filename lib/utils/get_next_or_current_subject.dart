@@ -23,7 +23,7 @@ final List<String> days = [
 
 Future<Subject> getNextOrCurrentSubject(
     Future<SharedPreferences> storeFuture, SettingsData settings) {
-  Completer<Subject> c = Completer<Subject>();
+  SharedPreferences store = await sharedPrefs;
   TimetableData timetable;
   bool foundSubject = false;
   int dayIndex = 1;
@@ -32,7 +32,7 @@ Future<Subject> getNextOrCurrentSubject(
     if (store.containsKey("timetable")) {
       timetable = TimetableData(jsonDecode(store.getString("timetable")!));
     } else {
-      timetable = await getTimetableData(store);
+    timetable = await getTimetableData(sharedPrefs);
     }
 
     DateTime checkedTime = DateTime.now();

@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:new_unikl_link/server/query.dart';
 import 'package:new_unikl_link/server/urls.dart';
@@ -12,12 +11,12 @@ import 'package:new_unikl_link/utils/normalize.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DebugInfoPage extends StatefulWidget {
-  final Future<SharedPreferences> storeFuture;
+  final Future<SharedPreferences> sharedPrefs;
   final StudentData studentData;
 
   const DebugInfoPage({
     super.key,
-    required this.storeFuture,
+    required this.sharedPrefs,
     required this.studentData,
   });
 
@@ -140,8 +139,7 @@ class _DebugInfoPageState extends State<DebugInfoPage> {
     );
 
     int semesterIndex = 1;
-    SharedPreferences store = await widget.storeFuture;
-    Response resp = await http.get(Uri.parse(eCitieURLs.serverQuery(
+    SharedPreferences store = await widget.sharedPrefs;
         store.getString("eCitieToken")!,
         eCitieQuery.semesterData
             .replaceAll("|STUDENTID|", widget.studentData.id))));

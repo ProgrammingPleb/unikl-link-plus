@@ -14,10 +14,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 class TimetablePage extends StatefulWidget {
   final ECitieURLs eCitieURL = ECitieURLs();
   final ECitieQuery eCitieQ = ECitieQuery();
-  final Future<SharedPreferences> storeFuture;
+  final Future<SharedPreferences> sharedPrefs;
   final SettingsData settings;
 
-  TimetablePage({super.key, required this.storeFuture, required this.settings});
+  TimetablePage({super.key, required this.sharedPrefs, required this.settings});
 
   @override
   State<TimetablePage> createState() => _TimetableState();

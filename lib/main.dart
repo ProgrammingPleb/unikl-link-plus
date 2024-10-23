@@ -114,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             .push(MaterialPageRoute<ReloadData>(
                 builder: (context) => SettingsPage(
                       prevContext: context,
-                      storeFuture: widget.sharedPrefs,
+                      sharedPrefs: widget.sharedPrefs,
                       settingsData: settingsData,
                     )))
             .then((update) {
@@ -200,7 +200,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (builder) => DebugInfoPage(
-                storeFuture: widget.sharedPrefs,
+                sharedPrefs: widget.sharedPrefs,
                 studentData: studentData,
               ),
             ),
@@ -237,7 +237,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             switch (tab) {
               case 1:
                 pages[tab] = TimetablePage(
-                  storeFuture: widget.sharedPrefs,
+                  sharedPrefs: widget.sharedPrefs,
                   settings: settingsData,
                 );
                 break;

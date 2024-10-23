@@ -9,12 +9,12 @@ import 'package:new_unikl_link/types/info/student_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
-  final Future<SharedPreferences> storeFuture;
+  final Future<SharedPreferences> sharedPrefs;
   final bool relogin;
 
   const LoginPage({
     super.key,
-    required this.storeFuture,
+    required this.sharedPrefs,
     this.relogin = false,
   });
 
@@ -134,6 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               );
                             } else {
+                            SharedPreferences store = await widget.sharedPrefs;
                               AuthData auth = AuthData.fromJson(json);
                               http
                                   .get(Uri.parse(eCitieURL.serverQuery(

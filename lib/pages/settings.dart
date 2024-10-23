@@ -10,13 +10,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsPage extends StatefulWidget {
   final BuildContext prevContext;
-  final Future<SharedPreferences> storeFuture;
+  final Future<SharedPreferences> sharedPrefs;
   final SettingsData settingsData;
 
   const SettingsPage({
     super.key,
     required this.prevContext,
-    required this.storeFuture,
+    required this.sharedPrefs,
     required this.settingsData,
   });
 
@@ -152,7 +152,7 @@ class _SettingsPageState extends State<SettingsPage> {
           setState(() {
             refresh = true;
           });
-          checkToken(storeFuture: widget.storeFuture, resetCache: true)
+          checkToken(storeFuture: widget.sharedPrefs, resetCache: true)
               .then((status) {
             if (!status.valid && context.mounted) {
               if (status.needsRelogin) {
@@ -160,7 +160,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   context,
                   MaterialPageRoute<StudentData>(
                     builder: (context) => LoginPage(
-                      storeFuture: widget.storeFuture,
+                      sharedPrefs: widget.sharedPrefs,
                       relogin: true,
                     ),
                   ),
@@ -173,7 +173,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   context,
                   MaterialPageRoute<StudentData>(
                     builder: (context) => LoginPage(
-                      storeFuture: widget.storeFuture,
+                      sharedPrefs: widget.sharedPrefs,
                     ),
                   ),
                 ).then((data) {
@@ -183,11 +183,9 @@ class _SettingsPageState extends State<SettingsPage> {
               }
             }
 
-            widget.storeFuture.then((store) {
-              getTimetableData(store).then((value) {
+            getTimetableData(widget.sharedPrefs).then((value) {
                 setState(() {
                   refresh = false;
-                });
               });
             });
           });
