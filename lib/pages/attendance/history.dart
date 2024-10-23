@@ -36,54 +36,65 @@ class _AttendanceHistory extends State<AttendanceHistoryPage>
   final ECitieURLs _eCitieURLs = ECitieURLs();
   final ECitieQuery _eCitieQuery = ECitieQuery();
   bool _dataLoaded = false;
+  bool refreshing = true;
 
   @override
   void initState() {
-    widget.sharedPrefs.then((store) {
-      http
-          .get(Uri.parse(_eCitieURLs.serverQuery(
-              store.getString("eCitieToken")!,
-              _eCitieQuery.semesterData
-                  .replaceAll("|STUDENTID|", store.getString("personID")!))))
-          .then((resp) {
-        StudentSemesterData semesterData =
-            StudentSemesterData(jsonDecode(resp.body));
-        http
-            .get(Uri.parse(_eCitieURLs.serverQuery(
-                store.getString("eCitieToken")!,
-                _eCitieQuery.subjects
-                    .replaceFirst("|SEMCODE|", semesterData.latest.code)
-                    .replaceFirst(
-                        "|STUDENTID|", store.getString("personID")!))))
-            .then((resp) {
-          AttendanceData attendanceData = AttendanceData(jsonDecode(resp.body));
-          http
-              .get(Uri.parse(_eCitieURLs.serverQuery(
-                  store.getString("eCitieToken")!,
-                  _eCitieQuery.attendanceHistory
-                      .replaceFirst("|SEMCODE|", semesterData.latest.code)
-                      .replaceFirst(
-                          "|STUDENTID|", store.getString("personID")!))))
-              .then((resp) {
-            attendanceData.addEntries(jsonDecode(resp.body));
-            int pos = 0;
-            for (String subject in attendanceData.subjects) {
-              _tabs.add(subject);
-              _tabViews.add(SubjectTab(
-                subject: attendanceData.entryData[pos],
-                subjectName: subject,
-              ));
-              pos++;
-            }
-            setState(() {
-              _tabController = TabController(length: _tabs.length, vsync: this);
-              _dataLoaded = true;
-            });
-          });
-        });
-      });
-    });
+    getAttendanceData();
     super.initState();
+  }
+
+  Future<void> getAttendanceData({bool refresh = false}) async {
+    setState(() {
+      refreshing = true;
+    });
+    SharedPreferences store = await widget.sharedPrefs;
+    http.Response serverResp = await _eCitieURLs.sendQuery(
+        widget.sharedPrefs,
+        _eCitieQuery.buildQuery(
+            store.getString("eCitieToken")!,
+            _eCitieQuery.semesterData.replaceAll(
+              "|STUDENTID|",
+              store.getString("personID")!,
+            )));
+    StudentSemesterData semesterData =
+        StudentSemesterData(jsonDecode(serverResp.body));
+    serverResp = await _eCitieURLs.sendQuery(
+        widget.sharedPrefs,
+        _eCitieQuery.buildQuery(
+            store.getString("eCitieToken")!,
+            _eCitieQuery.subjects
+                .replaceFirst("|SEMCODE|", semesterData.latest.code)
+                .replaceFirst("|STUDENTID|", store.getString("personID")!)));
+    AttendanceData attendanceData = AttendanceData(jsonDecode(serverResp.body));
+    serverResp = await _eCitieURLs.sendQuery(
+        widget.sharedPrefs,
+        _eCitieQuery.buildQuery(
+            store.getString("eCitieToken")!,
+            _eCitieQuery.attendanceHistory
+                .replaceFirst("|SEMCODE|", semesterData.latest.code)
+                .replaceFirst("|STUDENTID|", store.getString("personID")!)));
+    attendanceData.addEntries(jsonDecode(serverResp.body));
+    int pos = 0;
+    if (refresh) {
+      _tabs = [];
+      _tabViews = [];
+    }
+    for (String subject in attendanceData.subjects) {
+      _tabs.add(subject);
+      _tabViews.add(SubjectTab(
+        subject: attendanceData.entryData[pos],
+        subjectName: subject,
+      ));
+      pos++;
+    }
+    setState(() {
+      if (!refresh) {
+        _tabController = TabController(length: _tabs.length, vsync: this);
+      }
+      _dataLoaded = true;
+      refreshing = false;
+    });
   }
 
   @override
@@ -100,23 +111,39 @@ class _AttendanceHistory extends State<AttendanceHistoryPage>
         Align(
           alignment: Alignment.bottomRight,
           child: Padding(
-            padding: const EdgeInsets.only(right: 20, bottom: 20),
-            child: FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => SelfAttendancePage(
-                      studentData: widget.studentData,
-                      storeFuture: widget.sharedPrefs,
-                    ),
+              padding: const EdgeInsets.only(right: 20, bottom: 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  FloatingActionButton.extended(
+                    onPressed: () async {
+                      if (!refreshing) {
+                        getAttendanceData(refresh: true);
+                      }
+                    },
+                    heroTag: "RefreshAtt",
+                    label: Text("Refresh"),
+                    icon: getRefreshIcon(refreshing),
                   ),
-                );
-              },
-              heroTag: "SelfAtt",
-              label: Text("Self Attendance"),
-              icon: Icon(Icons.qr_code),
-            ),
-          ),
+                  SizedBox(height: 8),
+                  FloatingActionButton.extended(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => SelfAttendancePage(
+                            studentData: widget.studentData,
+                            storeFuture: widget.sharedPrefs,
+                          ),
+                        ),
+                      );
+                    },
+                    heroTag: "SelfAtt",
+                    label: Text("Self Attendance"),
+                    icon: Icon(Icons.qr_code),
+                  ),
+                ],
+              )),
         ),
       ],
     );
@@ -223,4 +250,21 @@ class SubjectTab extends StatelessWidget {
       ],
     );
   }
+}
+
+Widget getRefreshIcon(bool refresh) {
+  if (refresh) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 4),
+      child: SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(
+          value: null,
+          strokeWidth: 3.0,
+        ),
+      ),
+    );
+  }
+  return Icon(Icons.refresh);
 }

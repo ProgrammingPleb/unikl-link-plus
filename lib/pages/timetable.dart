@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:new_unikl_link/components/timetable_entry_no_physical.dart';
 import 'package:new_unikl_link/components/timetable_entry_with_physical.dart';
 import 'package:new_unikl_link/server/query.dart';
@@ -24,114 +25,127 @@ class TimetablePage extends StatefulWidget {
 }
 
 class _TimetableState extends State<TimetablePage> {
+  final DateFormat timeFormat = DateFormat("h:mma");
   bool _semBreak = false;
   bool _finalExam = false;
   String? _bannerText;
   List<Widget> timetableList = [];
   Widget currentView = const UnloadedData();
+  bool refreshing = false;
+
+  void displayTimetable({required TimetableData data, bool refresh = false}) {
+    if (refresh) {
+      timetableList = [];
+    }
+    for (var day in data.days) {
+      if (widget.settings.fastingTimetable && day.dayIndex == 5) {
+        timetableList.add(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 10, 0, 2),
+            child: Text(
+              day.dayName,
+              style: const TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        );
+        timetableList.add(
+          const Padding(
+            padding: EdgeInsets.only(bottom: 15),
+            child: Text(
+              "There will be a break between 12:30PM and 2:30PM.\n"
+              "Any subjects which are in this range will be paused "
+              "at this time.",
+            ),
+          ),
+        );
+      } else {
+        timetableList.add(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
+            child: Text(
+              day.dayName,
+              style: const TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        );
+      }
+      for (var entry in day.entries) {
+        Widget entryType;
+
+        if (entry.online) {
+          entryType = TimetableEntryNoPhysical(
+            startTime: timeFormat.format(
+                entry.getStartTimeObject(widget.settings.fastingTimetable)),
+            endTime: timeFormat.format(
+                entry.getEndTimeObject(widget.settings.fastingTimetable)),
+            subjectCode: entry.subjectCode,
+            subjectName: entry.subjectName,
+          );
+        } else {
+          entryType = TimetableEntryWithPhysical(
+            startTime: timeFormat.format(
+                entry.getStartTimeObject(widget.settings.fastingTimetable)),
+            endTime: timeFormat.format(
+                entry.getEndTimeObject(widget.settings.fastingTimetable)),
+            subjectCode: entry.subjectCode,
+            subjectName: entry.subjectName,
+            roomCode: entry.roomCode,
+          );
+        }
+        timetableList.add(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
+            child: entryType,
+          ),
+        );
+      }
+    }
+
+    if (_semBreak) {
+      _bannerText = "Currently on Semester Break";
+    }
+    if (_finalExam) {
+      _bannerText = "Currently on Final Examination Week";
+    }
+
+    setState(() {
+      currentView = LoadedData(
+        timetableList: timetableList,
+        bannerText: _bannerText,
+      );
+    });
+  }
 
   @override
   void initState() {
-    Future<TimetableData> getData() {
-      final Completer<TimetableData> c = Completer<TimetableData>();
+    Future<TimetableData> getData() async {
+      SharedPreferences store = await widget.sharedPrefs;
 
-      widget.storeFuture.then((store) {
-        if (!store.containsKey("timetable")) {
-          getTimetableData(store).then((TimetableData timetable) {
-            _semBreak = store.getBool("semBreak")!;
-            _finalExam = store.getBool("finalExam")!;
-            c.complete(timetable);
-          });
-        } else {
-          _semBreak = store.getBool("semBreak")!;
-          _finalExam = store.getBool("finalExam")!;
-          c.complete(TimetableData(jsonDecode(store.getString("timetable")!)));
-        }
-      });
-
-      return c.future;
+      if (!store.containsKey("timetable")) {
+        setState(() {
+          refreshing = true;
+        });
+        TimetableData timetable = await getTimetableData(widget.sharedPrefs);
+        _semBreak = store.getBool("semBreak")!;
+        _finalExam = store.getBool("finalExam")!;
+        setState(() {
+          refreshing = false;
+        });
+        return timetable;
+      }
+      _semBreak = store.getBool("semBreak")!;
+      _finalExam = store.getBool("finalExam")!;
+      return TimetableData(jsonDecode(store.getString("timetable")!));
     }
 
     getData().then((data) {
-      for (var day in data.days) {
-        if (widget.settings.fastingTimetable && day.dayIndex == 5) {
-          timetableList.add(
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 10, 0, 2),
-              child: Text(
-                day.dayName,
-                style: const TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          );
-          timetableList.add(
-            const Padding(
-              padding: EdgeInsets.only(bottom: 15),
-              child: Text(
-                "There will be a break between 12:30PM and 2:30PM.\n"
-                "Any subjects which are in this range will be paused "
-                "at this time.",
-              ),
-            ),
-          );
-        } else {
-          timetableList.add(
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
-              child: Text(
-                day.dayName,
-                style: const TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          );
-        }
-        for (var entry in day.entries) {
-          Widget entryType;
-
-          if (entry.online) {
-            entryType = TimetableEntryNoPhysical(
-              startTime: entry.startTime(widget.settings.fastingTimetable),
-              endTime: entry.endTime(widget.settings.fastingTimetable),
-              subjectCode: entry.subjectCode,
-              subjectName: entry.subjectName,
-            );
-          } else {
-            entryType = TimetableEntryWithPhysical(
-              startTime: entry.startTime(widget.settings.fastingTimetable),
-              endTime: entry.endTime(widget.settings.fastingTimetable),
-              subjectCode: entry.subjectCode,
-              subjectName: entry.subjectName,
-              roomCode: entry.roomCode,
-            );
-          }
-          timetableList.add(
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
-              child: entryType,
-            ),
-          );
-        }
-      }
-
-      if (_semBreak) {
-        _bannerText = "Currently on Semester Break";
-      }
-      if (_finalExam) {
-        _bannerText = "Currently on Final Examination Week";
-      }
-
-      setState(() {
-        currentView = LoadedData(
-          timetableList: timetableList,
-          bannerText: _bannerText,
-        );
-      });
+      displayTimetable(data: data);
     });
 
     super.initState();
@@ -147,10 +161,25 @@ class _TimetableState extends State<TimetablePage> {
           child: Padding(
             padding: const EdgeInsets.only(right: 20, bottom: 20),
             child: FloatingActionButton.extended(
-              onPressed: () {},
+              onPressed: () async {
+                if (!refreshing) {
+                  setState(() {
+                    refreshing = true;
+                  });
+                  SharedPreferences store = await widget.sharedPrefs;
+                  TimetableData data =
+                      await getTimetableData(widget.sharedPrefs);
+                  _semBreak = store.getBool("semBreak")!;
+                  _finalExam = store.getBool("finalExam")!;
+                  displayTimetable(data: data, refresh: true);
+                  setState(() {
+                    refreshing = false;
+                  });
+                }
+              },
               heroTag: "RefreshTimetable",
               label: Text("Refresh"),
-              icon: Icon(Icons.refresh),
+              icon: getRefreshIcon(refreshing),
             ),
           ),
         ),
@@ -258,4 +287,21 @@ class LoadedData extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget getRefreshIcon(bool refresh) {
+  if (refresh) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 4),
+      child: SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(
+          value: null,
+          strokeWidth: 3.0,
+        ),
+      ),
+    );
+  }
+  return Icon(Icons.refresh);
 }
