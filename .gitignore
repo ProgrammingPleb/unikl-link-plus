@@ -57,3 +57,6 @@ lib/generated_plugin_registrant.dart
 
 generated_plugin*
 GeneratedPlugin*
+
+# Sentry Upload
+sentry.properties
