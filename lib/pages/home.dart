@@ -10,6 +10,7 @@ import 'package:new_unikl_link/types/info/student_profile.dart';
 import 'package:new_unikl_link/types/settings/data.dart';
 import 'package:new_unikl_link/types/subject.dart';
 import 'package:new_unikl_link/utils/get_next_or_current_subject.dart';
+import 'package:new_unikl_link/utils/normalize.dart';
 import 'package:new_unikl_link/utils/token_tools.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -181,7 +182,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           ),
         ),
         Text(
-          name,
+          normalizeName(name),
           style: const TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
