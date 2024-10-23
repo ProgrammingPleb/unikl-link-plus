@@ -14,7 +14,6 @@ import 'package:new_unikl_link/server/query.dart';
 import 'package:new_unikl_link/server/urls.dart';
 import 'package:new_unikl_link/types/info/student_profile.dart';
 import 'package:new_unikl_link/types/settings/data.dart';
-import 'package:new_unikl_link/types/settings/reload_data.dart';
 import 'package:receive_intent/receive_intent.dart' as rintent;
 import 'package:receive_intent/receive_intent.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -110,23 +109,15 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
     if (intent != null) {
       if (intent.data == "${appURI}settings") {
-        Navigator.of(context)
-            .push(MaterialPageRoute<ReloadData>(
-                builder: (context) => SettingsPage(
-                      prevContext: context,
-                      sharedPrefs: widget.sharedPrefs,
-                      settingsData: settingsData,
-                    )))
-            .then((update) {
-          if (update != null) {
-            if (update.studentProfile) {
-              studentData = update.studentData!;
-            }
-            if (update.debugInterface) {
-              updateDebugInterface();
-            }
-          }
-        });
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => SettingsPage(
+                  prevContext: context,
+                  sharedPrefs: widget.sharedPrefs,
+                  settingsData: settingsData,
+                  onUpdate: (data) => setState(() {
+                    settingsData = data;
+                  }),
+                )));
       }
     }
   }
@@ -235,6 +226,18 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         onDestinationSelected: (tab) => setState(() {
           if (pages[tab] is SizedBox) {
             switch (tab) {
+              case 0:
+                pages[tab] = Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                  child: HomePage(
+                    sharedPrefs: widget.sharedPrefs,
+                    onReceiveStudentData: (data) {
+                      studentData = data;
+                    },
+                    logoutCheck: () => hasLoggedOut,
+                  ),
+                );
+                break;
               case 1:
                 pages[tab] = TimetablePage(
                   sharedPrefs: widget.sharedPrefs,
@@ -281,6 +284,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                       ];
                       hasLoggedOut = false;
                     },
+                    onSettingsUpdate: (data) => setState(() {
+                      settingsData = data;
+                      pages[0] = SizedBox();
+                      pages[1] = SizedBox();
+                    }),
                   ),
                 );
                 break;

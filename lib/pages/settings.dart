@@ -1,23 +1,20 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:new_unikl_link/pages/login.dart';
-import 'package:new_unikl_link/types/info/student_profile.dart';
 import 'package:new_unikl_link/types/settings/data.dart';
-import 'package:new_unikl_link/types/settings/reload_data.dart';
-import 'package:new_unikl_link/utils/get_timetable_data.dart';
-import 'package:new_unikl_link/utils/token_tools.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsPage extends StatefulWidget {
   final BuildContext prevContext;
   final Future<SharedPreferences> sharedPrefs;
   final SettingsData settingsData;
+  final void Function(SettingsData data) onUpdate;
 
   const SettingsPage({
     super.key,
     required this.prevContext,
     required this.sharedPrefs,
     required this.settingsData,
+    required this.onUpdate,
   });
 
   @override
@@ -26,14 +23,17 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool refresh = false;
-  ReloadData reloadData = ReloadData();
+  bool hasChanged = false;
 
   @override
   Widget build(BuildContext context) {
-    return PopScope<ReloadData?>(
-      onPopInvokedWithResult: (bool didPop, ReloadData? result) async {
-        if (!refresh) {
-          Navigator.of(context).pop(reloadData);
+    return PopScope(
+      canPop: !refresh,
+      onPopInvokedWithResult: (bool didPop, _) async {
+        if (didPop && hasChanged) {
+          SharedPreferences store = await widget.sharedPrefs;
+          store.setString("settings", widget.settingsData.toJson());
+          widget.onUpdate(widget.settingsData);
         }
         return;
       },
@@ -54,16 +54,33 @@ class _SettingsPageState extends State<SettingsPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 18),
                   child: Column(
                     children: [
-                      Padding(
+                      /* Padding(
                         padding: const EdgeInsets.only(bottom: 30),
                         child: tokenRefreshHours(context),
+                      ), */
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 30),
+                        child: Column(
+                          children: [
+                            Text(
+                              "Looking for \"Data Refresh Frequency\"?",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              "This feature will return in a future release. "
+                              "Stay tuned!",
+                            ),
+                          ],
+                        ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(bottom: 30),
                         child: fastingTimetable(context),
                       ),
                       ...enableDebug(context),
-                      resetCache(context),
+                      //resetCache(context),
                     ],
                   ),
                 ),
@@ -122,7 +139,6 @@ class _SettingsPageState extends State<SettingsPage> {
                   ? null
                   : (value) {
                       setState(() {
-                        reloadData.debugInterface = true;
                         widget.settingsData.debugMode = value;
                       });
                     },
@@ -133,7 +149,7 @@ class _SettingsPageState extends State<SettingsPage> {
     ];
   }
 
-  Row resetCache(BuildContext context) {
+  /* Row resetCache(BuildContext context) {
     Widget resetElement() {
       if (refresh) {
         return const Padding(
@@ -184,8 +200,8 @@ class _SettingsPageState extends State<SettingsPage> {
             }
 
             getTimetableData(widget.sharedPrefs).then((value) {
-                setState(() {
-                  refresh = false;
+              setState(() {
+                refresh = false;
               });
             });
           });
@@ -230,7 +246,7 @@ class _SettingsPageState extends State<SettingsPage> {
         resetElement(),
       ],
     );
-  }
+  } */
 
   Row fastingTimetable(BuildContext context) {
     return Row(
@@ -266,8 +282,8 @@ class _SettingsPageState extends State<SettingsPage> {
           thumbIcon: switchIcons,
           value: widget.settingsData.fastingTimetable,
           onChanged: (value) {
+            hasChanged = true;
             setState(() {
-              reloadData.atAGlance = true;
               widget.settingsData.fastingTimetable = value;
             });
           },
@@ -276,7 +292,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Column tokenRefreshHours(BuildContext context) {
+  Column dataRefreshHours(BuildContext context) {
     return Column(
       children: [
         Padding(
@@ -316,82 +332,6 @@ class _SettingsPageState extends State<SettingsPage> {
             });
           },
         )
-      ],
-    );
-  }
-
-  Column appReleaseBranch(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: Column(
-            children: [
-              const Padding(
-                padding: EdgeInsets.only(bottom: 2),
-                child: Text(
-                  "App Release Branch",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Text(
-                "Determines which release branch the app "
-                "should update to.",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-        SegmentedButton<String>(
-          segments: const [
-            ButtonSegment(
-              value: "stable",
-              label: SizedBox(
-                width: 35,
-                child: Text(
-                  "Stable",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 10),
-                ),
-              ),
-            ),
-            ButtonSegment(
-              value: "dev",
-              label: SizedBox(
-                width: 35,
-                child: Text(
-                  "Dev",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 10),
-                ),
-              ),
-            ),
-            ButtonSegment(
-              value: "canary",
-              label: SizedBox(
-                width: 35,
-                child: Text(
-                  "Canary",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 10),
-                ),
-              ),
-            ),
-          ],
-          selected: {widget.settingsData.appBranch},
-          onSelectionChanged: (value) {
-            reloadData.changedVersions = true;
-            setState(() {
-              widget.settingsData.appBranch = value.first;
-            });
-          },
-        ),
       ],
     );
   }

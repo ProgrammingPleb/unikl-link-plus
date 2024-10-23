@@ -4,7 +4,6 @@ import 'package:new_unikl_link/pages/login.dart';
 import 'package:new_unikl_link/pages/settings.dart';
 import 'package:new_unikl_link/types/info/student_profile.dart';
 import 'package:new_unikl_link/types/settings/data.dart';
-import 'package:new_unikl_link/types/settings/reload_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MoreActionsPage extends StatelessWidget {
@@ -12,6 +11,7 @@ class MoreActionsPage extends StatelessWidget {
   final SettingsData settingsData;
   final void Function() onLogout;
   final void Function() onLogin;
+  final void Function(SettingsData data) onSettingsUpdate;
 
   const MoreActionsPage({
     super.key,
@@ -19,6 +19,7 @@ class MoreActionsPage extends StatelessWidget {
     required this.settingsData,
     required this.onLogout,
     required this.onLogin,
+    required this.onSettingsUpdate,
   });
 
   @override
@@ -30,11 +31,12 @@ class MoreActionsPage extends StatelessWidget {
           icon: Icons.settings,
           label: "Settings",
           onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute<ReloadData>(
+            MaterialPageRoute(
               builder: (context) => SettingsPage(
                 prevContext: context,
                 sharedPrefs: sharedPrefs,
                 settingsData: settingsData,
+                onUpdate: (data) => onSettingsUpdate(data),
               ),
             ),
           ),
