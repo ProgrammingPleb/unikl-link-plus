@@ -117,65 +117,49 @@ class _LoginPageState extends State<LoginPage> {
                   Padding(
                     padding: const EdgeInsets.only(top: 20),
                     child: FilledButton.tonal(
-                      onPressed: () {
+                      onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                          http
-                              .get(Uri.parse(eCitieURL.auth(
-                                  usernameController.text,
-                                  passwordController.text)))
-                              .then((resp) {
-                            Map<String, dynamic> json = jsonDecode(resp.body);
-                            if (json["status"] == "0" && context.mounted) {
-                              ScaffoldMessenger.of(context).clearSnackBars();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content:
-                                      Text("Invalid username or/and password!"),
-                                ),
-                              );
-                            } else {
+                          http.Response resp = await http.get(Uri.parse(
+                              eCitieURL.auth(usernameController.text,
+                                  passwordController.text)));
+                          Map<String, dynamic> json = jsonDecode(resp.body);
+                          if (json["status"] == "0" && context.mounted) {
+                            ScaffoldMessenger.of(context).clearSnackBars();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text("Invalid username or/and password!"),
+                              ),
+                            );
+                          } else {
                             SharedPreferences store = await widget.sharedPrefs;
-                              AuthData auth = AuthData.fromJson(json);
-                              http
-                                  .get(Uri.parse(eCitieURL.serverQuery(
-                                      auth.eCitieToken,
-                                      eCitieQ.studentProfile.replaceFirst(
-                                          "|STAFFEMAIL|",
-                                          usernameController.text))))
-                                  .then((resp) {
-                                List rawResp = jsonDecode(resp.body);
-                                StudentData studentData =
-                                    StudentData.fromJson(rawResp[0]);
-                                widget.storeFuture.then(
-                                  (store) {
-                                    store.setString(
-                                        "eCitieToken", auth.eCitieToken);
-                                    store.setString("o365AccessToken",
-                                        auth.o365AccessToken);
-                                    store.setString("o365RefreshToken",
-                                        auth.o365RefreshToken);
-                                    store.setString("o365TokenExpiryTime",
-                                        auth.o365TokenExpiryTime);
-                                    store.setString("personID", auth.personID);
-                                    store.setString(
-                                        "username", usernameController.text);
-                                    store.setString(
-                                        "password", passwordController.text);
-                                    store.setString(
-                                        "profile", studentData.toJson());
-                                    if (context.mounted) {
-                                      FocusScopeNode currentFocus =
-                                          FocusScope.of(context);
-                                      if (!currentFocus.hasPrimaryFocus) {
-                                        currentFocus.unfocus();
-                                      }
-                                      Navigator.of(context).pop(studentData);
-                                    }
-                                  },
-                                );
-                              });
+                            AuthData auth = AuthData.fromJson(json);
+                            store.setString("eCitieToken", auth.eCitieToken);
+                            store.setString("personID", auth.personID);
+                            resp = await eCitieURL.sendQuery(
+                                widget.sharedPrefs,
+                                eCitieQ.buildQuery(
+                                    auth.eCitieToken,
+                                    eCitieQ.studentProfile.replaceFirst(
+                                        "|STAFFEMAIL|",
+                                        usernameController.text)));
+                            List rawResp = jsonDecode(resp.body);
+                            StudentData studentData =
+                                StudentData.fromJson(rawResp[0]);
+                            store.setString(
+                                "username", usernameController.text);
+                            store.setString(
+                                "password", passwordController.text);
+                            store.setString("profile", studentData.toJson());
+                            if (context.mounted) {
+                              FocusScopeNode currentFocus =
+                                  FocusScope.of(context);
+                              if (!currentFocus.hasPrimaryFocus) {
+                                currentFocus.unfocus();
+                              }
+                              Navigator.of(context).pop(studentData);
                             }
-                          });
+                          }
                         }
                       },
                       style: ElevatedButton.styleFrom(

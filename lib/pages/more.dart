@@ -71,9 +71,6 @@ class MoreActionsPage extends StatelessWidget {
                               (store) {
                                 store.remove("timetable");
                                 store.remove("eCitieToken");
-                                store.remove("o365AccessToken");
-                                store.remove("o365RefreshToken");
-                                store.remove("o365TokenExpiryTime");
                                 store.remove("personID");
                                 store.remove("username");
                                 store.remove("password");
