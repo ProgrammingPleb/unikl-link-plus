@@ -10,8 +10,8 @@ class TimetableDay {
   void addEntry({
     required String subjectCode,
     required String subjectName,
-    required int startSlot,
-    required int endSlot,
+    required String startTime,
+    required String endTime,
     required bool online,
     required String roomCode,
   }) {
@@ -19,8 +19,8 @@ class TimetableDay {
       dayIndex: dayIndex,
       subjectCode: subjectCode,
       subjectName: subjectName,
-      startSlot: startSlot,
-      endSlot: endSlot,
+      startTime: startTime,
+      endTime: endTime,
       online: online,
       roomCode: roomCode,
     ));

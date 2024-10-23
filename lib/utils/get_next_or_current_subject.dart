@@ -22,85 +22,75 @@ final List<String> days = [
 ];
 
 Future<Subject> getNextOrCurrentSubject(
-    Future<SharedPreferences> storeFuture, SettingsData settings) {
+    Future<SharedPreferences> sharedPrefs, SettingsData settings) async {
   SharedPreferences store = await sharedPrefs;
   TimetableData timetable;
-  bool foundSubject = false;
   int dayIndex = 1;
 
-  storeFuture.then((SharedPreferences store) async {
-    if (store.containsKey("timetable")) {
-      timetable = TimetableData(jsonDecode(store.getString("timetable")!));
-    } else {
+  if (store.containsKey("timetable")) {
+    timetable = TimetableData(jsonDecode(store.getString("timetable")!));
+  } else {
     timetable = await getTimetableData(sharedPrefs);
+  }
+
+  DateTime checkedTime = DateTime.now();
+  String currentDay = DateFormat.EEEE().format(checkedTime);
+
+  for (String day in days) {
+    if (day == currentDay) {
+      break;
     }
+    dayIndex += 1;
+  }
 
-    DateTime checkedTime = DateTime.now();
-    String currentDay = DateFormat.EEEE().format(checkedTime);
-
-    for (String day in days) {
-      if (day == currentDay) {
-        break;
-      }
-      dayIndex += 1;
-    }
-
-    for (TimetableDay dayData in timetable.days) {
-      if (dayData.dayName == currentDay) {
-        for (TimetableDayEntry entry in dayData.entries) {
-          Subject currentSubject = Subject(
-            name: entry.subjectName,
-            code: entry.subjectCode,
-            roomCode: entry.roomCode,
-            online: entry.online,
-            startTime: normalizeTime(
-                entry.startTime(settings.fastingTimetable), checkedTime),
-            endTime: normalizeTime(
-                entry.endTime(settings.fastingTimetable), checkedTime),
-          );
-          if (currentSubject.isOngoing() || !currentSubject.hasStarted()) {
-            c.complete(currentSubject);
-            foundSubject = true;
-            break;
-          }
-        }
-      } else if (!foundSubject && dayData.dayIndex > dayIndex) {
-        TimetableDayEntry firstSubjectOfDay = dayData.entries[0];
-        Subject nextSubject = Subject(
-          name: firstSubjectOfDay.subjectName,
-          code: firstSubjectOfDay.subjectCode,
-          roomCode: firstSubjectOfDay.roomCode,
-          online: firstSubjectOfDay.online,
+  for (TimetableDay dayData in timetable.days) {
+    if (dayData.dayName == currentDay) {
+      for (TimetableDayEntry entry in dayData.entries) {
+        Subject currentSubject = Subject(
+          name: entry.subjectName,
+          code: entry.subjectCode,
+          roomCode: entry.roomCode,
+          online: entry.online,
           startTime: normalizeTime(
-              firstSubjectOfDay.startTime(settings.fastingTimetable),
-              checkedTime),
+              entry.getStartTimeObject(settings.fastingTimetable), checkedTime),
           endTime: normalizeTime(
-              firstSubjectOfDay.endTime(settings.fastingTimetable),
-              checkedTime),
-          followingDay: dayData.dayIndex - dayIndex,
+              entry.getEndTimeObject(settings.fastingTimetable), checkedTime),
         );
-        c.complete(nextSubject);
-        foundSubject = true;
-        break;
+        if (currentSubject.isOngoing() || !currentSubject.hasStarted()) {
+          return currentSubject;
+        }
       }
-    }
-    if (!foundSubject) {
-      TimetableDayEntry firstSubjectOfWeek = timetable.days[0].entries[0];
-      Subject currentSubject = Subject(
-        name: firstSubjectOfWeek.subjectName,
-        code: firstSubjectOfWeek.subjectCode,
-        roomCode: firstSubjectOfWeek.roomCode,
-        online: firstSubjectOfWeek.online,
+    } else if (dayData.dayIndex > dayIndex) {
+      TimetableDayEntry firstSubjectOfDay = dayData.entries[0];
+      Subject nextSubject = Subject(
+        name: firstSubjectOfDay.subjectName,
+        code: firstSubjectOfDay.subjectCode,
+        roomCode: firstSubjectOfDay.roomCode,
+        online: firstSubjectOfDay.online,
         startTime: normalizeTime(
-            firstSubjectOfWeek.startTime(settings.fastingTimetable),
+            firstSubjectOfDay.getStartTimeObject(settings.fastingTimetable),
             checkedTime),
         endTime: normalizeTime(
-            firstSubjectOfWeek.endTime(settings.fastingTimetable), checkedTime),
-        followingWeek: true,
+            firstSubjectOfDay.getEndTimeObject(settings.fastingTimetable),
+            checkedTime),
+        followingDay: dayData.dayIndex - dayIndex,
       );
-      c.complete(currentSubject);
+      return nextSubject;
     }
-  });
-
-  return c.future;
+  }
+  TimetableDayEntry firstSubjectOfWeek = timetable.days[0].entries[0];
+  Subject currentSubject = Subject(
+    name: firstSubjectOfWeek.subjectName,
+    code: firstSubjectOfWeek.subjectCode,
+    roomCode: firstSubjectOfWeek.roomCode,
+    online: firstSubjectOfWeek.online,
+    startTime: normalizeTime(
+        firstSubjectOfWeek.getStartTimeObject(settings.fastingTimetable),
+        checkedTime),
+    endTime: normalizeTime(
+        firstSubjectOfWeek.getEndTimeObject(settings.fastingTimetable),
+        checkedTime),
+    followingWeek: true,
+  );
+  return currentSubject;
 }

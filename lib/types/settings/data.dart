@@ -49,7 +49,7 @@ class SettingsData {
       "atAGlanceEnabled": _atAGlanceEnabled,
       "debugMode": _debugMode,
       "tokenRefreshHours": _tokenRefreshHours,
-      "fastingTimetable" : _fastingTimetable,
+      "fastingTimetable": _fastingTimetable,
     });
   }
 

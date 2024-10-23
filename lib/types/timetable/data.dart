@@ -10,84 +10,75 @@ class TimetableData {
   TimetableData(List<dynamic> rawData) {
     List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(rawData);
     TimetableDay dayData = TimetableDay(dayIndex: 9, dayName: "");
-    _InternalTimetableSection currentSubject = _InternalTimetableSection(
-        startSlot: 0,
-        day: "0",
-        roomCode: "",
-        subjectCode: "",
-        subjectName: "",
-        group: "");
+    _InternalTimetableSection currentSubject =
+        _InternalTimetableSection.empty();
     int dayIndex = 9;
-    int endSlot = 0;
+    bool hasSubject = true;
 
-    void checkSlotEntry() {
-      if (currentSubject.subjectCode != "") {
-        dayData.addEntry(
-          subjectCode: currentSubject.subjectCode,
-          subjectName: currentSubject.subjectName,
-          startSlot: currentSubject.startSlot,
-          endSlot: endSlot,
-          online: currentSubject.online,
-          roomCode: currentSubject.roomCode,
-        );
-      }
+    void addSubjectToDay() {
+      dayData.addEntry(
+        subjectCode: currentSubject.subjectCode,
+        subjectName: currentSubject.subjectName,
+        startTime: currentSubject.startTime,
+        endTime: currentSubject.endTime,
+        online: currentSubject.online,
+        roomCode: currentSubject.roomCode,
+      );
     }
 
     try {
       for (Map<String, dynamic> slotData in data) {
         _InternalTimetableSection slot =
             _InternalTimetableSection.fromMap(slotData);
-
-        if (slot.dayIndex != dayIndex) {
-          checkSlotEntry();
+        if (dayIndex != slot.dayIndex) {
           if (dayIndex != 9) {
+            addSubjectToDay();
+            currentSubject = _InternalTimetableSection.empty();
             days.add(dayData);
           }
-          dayIndex = slot.dayIndex;
-          currentSubject = _InternalTimetableSection(
-              startSlot: 0,
-              day: "0",
-              roomCode: "",
-              subjectCode: "",
-              subjectName: "",
-              group: "");
-          endSlot = 0;
           dayData =
               TimetableDay(dayIndex: slot.dayIndex, dayName: slot.dayName);
+          dayIndex = slot.dayIndex;
+          hasSubject = false;
         }
-        if (slot.subjectCode != currentSubject.subjectCode) {
-          checkSlotEntry();
+        if (slot.startTime != currentSubject.endTime) {
+          if (currentSubject.subjectCode != "") {
+            addSubjectToDay();
+          }
           currentSubject = slot;
-          endSlot = slot.startSlot;
-        } else {
-          endSlot = slot.startSlot;
         }
+        currentSubject.endTime = slot.endTime;
+        hasSubject = true;
       }
-      checkSlotEntry();
-      days.add(dayData);
     } catch (e) {
       DebugService(storeFuture: SharedPreferences.getInstance())
           .dataError("TimetableData", jsonEncode(data));
+    }
+    if (hasSubject) {
+      addSubjectToDay();
+      days.add(dayData);
     }
   }
 }
 
 class _InternalTimetableSection {
-  final int startSlot;
   late final bool online;
   late final int dayIndex;
   late final String roomCode;
   final String subjectCode;
   final String subjectName;
   final String group;
+  final String startTime;
+  String endTime;
 
   _InternalTimetableSection({
-    required this.startSlot,
     required String day,
     required String roomCode,
     required this.subjectCode,
     required this.subjectName,
     required this.group,
+    required this.startTime,
+    required this.endTime,
   }) {
     if (roomCode.contains("Online")) {
       online = true;
@@ -98,14 +89,27 @@ class _InternalTimetableSection {
     this.roomCode = roomCode.replaceFirst("1-", "");
   }
 
+  factory _InternalTimetableSection.empty() {
+    return _InternalTimetableSection(
+      day: "0",
+      roomCode: "",
+      subjectCode: "",
+      subjectName: "",
+      group: "",
+      startTime: "",
+      endTime: "",
+    );
+  }
+
   factory _InternalTimetableSection.fromMap(Map<String, dynamic> slotData) {
     return _InternalTimetableSection(
-      startSlot: slotData['TT_SLOT'],
       day: slotData['TT_DAY'],
       roomCode: slotData['TT_ROOM_CODE'],
       subjectCode: slotData['TT_SUBJECT_CODE'],
       subjectName: normalizeText(slotData['SM_DESC']),
       group: slotData['TT_GROUP'],
+      startTime: slotData['START_TIME'],
+      endTime: slotData['END_TIME'],
     );
   }
 
@@ -122,6 +126,4 @@ class _InternalTimetableSection {
 
     return days[dayIndex - 1];
   }
-
-
 }

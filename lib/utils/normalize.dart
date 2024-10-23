@@ -1,5 +1,3 @@
-import 'package:intl/intl.dart';
-
 String normalizeText(String text) {
   String tempName = "";
   text = text.replaceAll("_", " ");
@@ -31,16 +29,13 @@ String normalizeName(String name) {
   return tempName.trim();
 }
 
-DateTime normalizeTime(String timeString, DateTime checkedTime) {
-  DateFormat subjectTimeFormat = DateFormat("hh:mma");
-
-  DateTime time = subjectTimeFormat.parse(timeString);
+DateTime normalizeTime(DateTime subjectTime, DateTime checkedTime) {
   return DateTime(
     checkedTime.year,
     checkedTime.month,
     checkedTime.day,
-    time.hour,
-    time.minute,
+    subjectTime.hour,
+    subjectTime.minute,
   );
 }
 
