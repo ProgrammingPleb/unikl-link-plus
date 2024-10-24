@@ -29,16 +29,6 @@ String normalizeName(String name) {
   return tempName.trim();
 }
 
-DateTime normalizeTime(DateTime subjectTime, DateTime checkedTime) {
-  return DateTime(
-    checkedTime.year,
-    checkedTime.month,
-    checkedTime.day,
-    subjectTime.hour,
-    subjectTime.minute,
-  );
-}
-
 List<String> _keepAllCaps = [
   'ASP.NET',
   'IT',

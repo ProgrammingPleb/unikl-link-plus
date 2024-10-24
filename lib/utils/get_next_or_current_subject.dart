@@ -8,7 +8,6 @@ import 'package:new_unikl_link/types/timetable/data.dart';
 import 'package:new_unikl_link/types/timetable/day.dart';
 import 'package:new_unikl_link/types/timetable/entry.dart';
 import 'package:new_unikl_link/utils/get_timetable_data.dart';
-import 'package:new_unikl_link/utils/normalize.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final List<String> days = [
@@ -21,8 +20,11 @@ final List<String> days = [
   "Sunday",
 ];
 
-Future<Subject> getNextOrCurrentSubject(
-    Future<SharedPreferences> sharedPrefs, SettingsData settings) async {
+Future<Subject> getNextOrCurrentSubject({
+  required Future<SharedPreferences> sharedPrefs,
+  required SettingsData settings,
+  bool nextOnly = false,
+}) async {
   SharedPreferences store = await sharedPrefs;
   TimetableData timetable;
   int dayIndex = 1;
@@ -51,12 +53,11 @@ Future<Subject> getNextOrCurrentSubject(
           code: entry.subjectCode,
           roomCode: entry.roomCode,
           online: entry.online,
-          startTime: normalizeTime(
-              entry.getStartTimeObject(settings.fastingTimetable), checkedTime),
-          endTime: normalizeTime(
-              entry.getEndTimeObject(settings.fastingTimetable), checkedTime),
+          startTime: entry.getStartTimeObject(settings.fastingTimetable),
+          endTime: entry.getEndTimeObject(settings.fastingTimetable),
         );
-        if (currentSubject.isOngoing() || !currentSubject.hasStarted()) {
+        if ((!nextOnly && currentSubject.isOngoing()) ||
+            !currentSubject.hasStarted()) {
           return currentSubject;
         }
       }
@@ -67,12 +68,9 @@ Future<Subject> getNextOrCurrentSubject(
         code: firstSubjectOfDay.subjectCode,
         roomCode: firstSubjectOfDay.roomCode,
         online: firstSubjectOfDay.online,
-        startTime: normalizeTime(
+        startTime:
             firstSubjectOfDay.getStartTimeObject(settings.fastingTimetable),
-            checkedTime),
-        endTime: normalizeTime(
-            firstSubjectOfDay.getEndTimeObject(settings.fastingTimetable),
-            checkedTime),
+        endTime: firstSubjectOfDay.getEndTimeObject(settings.fastingTimetable),
         followingDay: dayData.dayIndex - dayIndex,
       );
       return nextSubject;
@@ -84,12 +82,8 @@ Future<Subject> getNextOrCurrentSubject(
     code: firstSubjectOfWeek.subjectCode,
     roomCode: firstSubjectOfWeek.roomCode,
     online: firstSubjectOfWeek.online,
-    startTime: normalizeTime(
-        firstSubjectOfWeek.getStartTimeObject(settings.fastingTimetable),
-        checkedTime),
-    endTime: normalizeTime(
-        firstSubjectOfWeek.getEndTimeObject(settings.fastingTimetable),
-        checkedTime),
+    startTime: firstSubjectOfWeek.getStartTimeObject(settings.fastingTimetable),
+    endTime: firstSubjectOfWeek.getEndTimeObject(settings.fastingTimetable),
     followingWeek: true,
   );
   return currentSubject;

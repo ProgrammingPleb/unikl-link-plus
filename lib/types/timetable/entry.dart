@@ -59,6 +59,7 @@ class TimetableDayEntry {
   @override
   String toString() {
     return jsonEncode({
+      "dayIndex": dayIndex,
       "subjectCode": subjectCode,
       "subjectName": subjectName,
       "startTime": startTime,
@@ -69,26 +70,50 @@ class TimetableDayEntry {
   }
 
   DateTime getStartTimeObject(bool fasting) {
-    DateTime time = timeFormat.parse(startTime);
+    DateTime currentTime = DateTime.now();
+    DateTime subjectTime = timeFormat.parse(startTime);
     if (fasting) {
       if (dayIndex == 5) {
-        time = timeFormat.parse(_fastingSlotsMapFriday[startTime]!);
+        subjectTime = timeFormat.parse(_fastingSlotsMapFriday[startTime]!);
       } else {
-        time = timeFormat.parse(_fastingSlotsMapNonFriday[startTime]!);
+        subjectTime = timeFormat.parse(_fastingSlotsMapNonFriday[startTime]!);
       }
     }
-    return time;
+    int dayIndexDiff = dayIndex - currentTime.weekday;
+    if (dayIndexDiff < 0) {
+      dayIndexDiff += 7;
+    }
+    DateTime result = DateTime(
+      currentTime.year,
+      currentTime.month,
+      currentTime.day + dayIndexDiff,
+      subjectTime.hour,
+      subjectTime.minute,
+    );
+    return result;
   }
 
   DateTime getEndTimeObject(bool fasting) {
-    DateTime time = timeFormat.parse(endTime);
+    DateTime currentTime = DateTime.now();
+    DateTime subjectTime = timeFormat.parse(endTime);
     if (fasting) {
       if (dayIndex == 5) {
-        time = timeFormat.parse(_fastingSlotsMapFriday[endTime]!);
+        subjectTime = timeFormat.parse(_fastingSlotsMapFriday[endTime]!);
       } else {
-        time = timeFormat.parse(_fastingSlotsMapNonFriday[endTime]!);
+        subjectTime = timeFormat.parse(_fastingSlotsMapNonFriday[endTime]!);
       }
     }
-    return time;
+    int dayIndexDiff = dayIndex - currentTime.weekday;
+    if (dayIndexDiff < 0) {
+      dayIndexDiff += 7;
+    }
+    DateTime result = DateTime(
+      currentTime.year,
+      currentTime.month,
+      currentTime.day + dayIndexDiff,
+      subjectTime.hour,
+      subjectTime.minute,
+    );
+    return result;
   }
 }

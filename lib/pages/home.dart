@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:new_unikl_link/components/info_entry.dart';
 import 'package:new_unikl_link/pages/login.dart';
 import 'package:new_unikl_link/types/info/student_profile.dart';
@@ -35,7 +36,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   String name = "Placeholder Name";
   String id = "Placeholder ID";
   String date = "12:00am (Thursday, 1 January)";
-  Subject nextSubject = Subject.empty();
+  Subject nextorCurrentSubject = Subject.empty();
+  Subject? nextSubject;
   bool loaded = false;
   late StudentData studentData;
   late SettingsData settingsData;
@@ -108,9 +110,20 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<void> updateNextClass() async {
-    Subject nextSubject =
-        await getNextOrCurrentSubject(widget.sharedPrefs, settingsData);
+    Subject nextorCurrentSubject = await getNextOrCurrentSubject(
+      sharedPrefs: widget.sharedPrefs,
+      settings: settingsData,
+    );
+    Subject? nextSubject;
+    if (nextorCurrentSubject.isOngoing()) {
+      nextSubject = await getNextOrCurrentSubject(
+        sharedPrefs: widget.sharedPrefs,
+        settings: settingsData,
+        nextOnly: true,
+      );
+    }
     setState(() {
+      this.nextorCurrentSubject = nextorCurrentSubject;
       this.nextSubject = nextSubject;
     });
   }
@@ -241,41 +254,72 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         SizedBox(
           height: 16,
         ),
-        InfoEntry(
-          icon: Icon(
-            Icons.update,
-            size: 32,
+        SubjectEntry(
+          subject: nextorCurrentSubject,
+          icon:
+              nextorCurrentSubject.isOngoing() ? Symbols.timer : Symbols.update,
+        ),
+        nextSubject != null
+            ? SizedBox(
+                height: 16,
+              )
+            : Column(),
+        nextSubject != null
+            ? SubjectEntry(
+                subject: nextSubject!,
+                icon: Symbols.update,
+              )
+            : Column(),
+      ],
+    );
+  }
+}
+
+class SubjectEntry extends StatelessWidget {
+  final Subject subject;
+  final IconData icon;
+
+  const SubjectEntry({
+    super.key,
+    required this.subject,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InfoEntry(
+      icon: Icon(
+        icon,
+        size: 32,
+      ),
+      label: subject.isOngoing() ? "Current Class" : "Next Class",
+      data: [
+        Text(
+          subject.name,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
-          label: nextSubject.isOngoing() ? "Current Class" : "Next Class",
-          data: [
+        ),
+        Row(
+          children: [
             Text(
-              nextSubject.name,
+              subject.online ? "Online Class" : "Location: ",
+            ),
+            Text(
+              subject.online
+                  ? ""
+                  : "${subject.roomCode}, "
+                      "level ${subject.roomLevel}",
               style: TextStyle(
-                fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            Row(
-              children: [
-                Text(
-                  nextSubject.online ? "Online Class" : "Location: ",
-                ),
-                Text(
-                  nextSubject.online
-                      ? ""
-                      : "${nextSubject.roomCode}, "
-                          "level ${nextSubject.roomLevel}",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            Text(
-              nextSubject.getFormattedDuration()[0].toUpperCase() +
-                  nextSubject.getFormattedDuration().substring(1),
-            ),
           ],
+        ),
+        Text(
+          subject.getFormattedDuration()[0].toUpperCase() +
+              subject.getFormattedDuration().substring(1),
         ),
       ],
     );
