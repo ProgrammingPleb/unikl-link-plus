@@ -80,22 +80,15 @@ class _TimetableState extends State<TimetablePage> {
 
         if (entry.online) {
           entryType = TimetableEntryNoPhysical(
-            startTime: timeFormat.format(
-                entry.getStartTimeObject(widget.settings.fastingTimetable)),
-            endTime: timeFormat.format(
-                entry.getEndTimeObject(widget.settings.fastingTimetable)),
-            subjectCode: entry.subjectCode,
-            subjectName: entry.subjectName,
+            entry: entry,
+            timeFormat: timeFormat,
+            fastingEnabled: widget.settings.fastingTimetable,
           );
         } else {
           entryType = TimetableEntryWithPhysical(
-            startTime: timeFormat.format(
-                entry.getStartTimeObject(widget.settings.fastingTimetable)),
-            endTime: timeFormat.format(
-                entry.getEndTimeObject(widget.settings.fastingTimetable)),
-            subjectCode: entry.subjectCode,
-            subjectName: entry.subjectName,
-            roomCode: entry.roomCode,
+            entry: entry,
+            timeFormat: timeFormat,
+            fastingEnabled: widget.settings.fastingTimetable,
           );
         }
         timetableList.add(

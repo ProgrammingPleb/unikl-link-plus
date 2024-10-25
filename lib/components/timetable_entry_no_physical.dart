@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:new_unikl_link/types/timetable/entry.dart';
 
 class TimetableEntryNoPhysical extends StatelessWidget {
-  final String startTime;
-  final String endTime;
-  final String subjectCode;
-  final String subjectName;
+  final TimetableDayEntry entry;
+  final DateFormat timeFormat;
+  final bool fastingEnabled;
 
   const TimetableEntryNoPhysical({
     super.key,
-    required this.startTime,
-    required this.endTime,
-    required this.subjectCode,
-    required this.subjectName,
+    required this.entry,
+    required this.timeFormat,
+    required this.fastingEnabled,
   });
 
   @override
@@ -22,7 +22,8 @@ class TimetableEntryNoPhysical extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(bottom: 5),
           child: Text(
-            "$startTime - $endTime",
+            "${timeFormat.format(entry.getStartTimeObject(fastingEnabled))} "
+            "- ${timeFormat.format(entry.getEndTimeObject(fastingEnabled))}",
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
@@ -48,21 +49,34 @@ class TimetableEntryNoPhysical extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          subjectCode,
-                          style: TextStyle(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            height: 1.3,
-                          ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              entry.subjectCode,
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              " (${entry.group})",
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
                         ),
                         FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text(
-                            subjectName,
+                            entry.subjectName,
                             style: TextStyle(
                               color: Theme.of(context)
                                   .colorScheme

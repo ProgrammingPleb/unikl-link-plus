@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:new_unikl_link/types/timetable/entry.dart';
 
 class TimetableEntryWithPhysical extends StatelessWidget {
-  final String startTime;
-  final String endTime;
-  final String subjectCode;
-  final String subjectName;
-  final String roomCode;
+  final TimetableDayEntry entry;
+  final DateFormat timeFormat;
+  final bool fastingEnabled;
 
   const TimetableEntryWithPhysical({
     super.key,
-    required this.startTime,
-    required this.endTime,
-    required this.subjectCode,
-    required this.subjectName,
-    required this.roomCode,
+    required this.entry,
+    required this.timeFormat,
+    required this.fastingEnabled,
   });
 
   @override
@@ -24,7 +22,8 @@ class TimetableEntryWithPhysical extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(bottom: 5),
           child: Text(
-            "$startTime - $endTime",
+            "${timeFormat.format(entry.getStartTimeObject(fastingEnabled))} "
+            "- ${timeFormat.format(entry.getEndTimeObject(fastingEnabled))}",
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
@@ -50,21 +49,34 @@ class TimetableEntryWithPhysical extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          subjectCode,
-                          style: TextStyle(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            height: 1.3,
-                          ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              entry.subjectCode,
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              " (${entry.group})",
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
                         ),
                         FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text(
-                            subjectName,
+                            entry.subjectName,
                             style: TextStyle(
                               color: Theme.of(context)
                                   .colorScheme
@@ -94,7 +106,7 @@ class TimetableEntryWithPhysical extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Level ${getLevelFromRoomCode(roomCode)}",
+                            "Level ${getLevelFromRoomCode(entry.roomCode)}",
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.onPrimary,
                               fontSize: 12,
@@ -104,7 +116,7 @@ class TimetableEntryWithPhysical extends StatelessWidget {
                           FittedBox(
                             fit: BoxFit.scaleDown,
                             child: Text(
-                              roomCode,
+                              entry.roomCode,
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.onPrimary,
                                 fontSize: 25,

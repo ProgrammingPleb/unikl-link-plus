@@ -23,6 +23,7 @@ class TimetableData {
         endTime: currentSubject.endTime,
         online: currentSubject.online,
         roomCode: currentSubject.roomCode,
+        group: currentSubject.group,
       );
     }
 

@@ -14,6 +14,7 @@ class TimetableDay {
     required String endTime,
     required bool online,
     required String roomCode,
+    required String group,
   }) {
     entries.add(TimetableDayEntry(
       dayIndex: dayIndex,
@@ -23,6 +24,7 @@ class TimetableDay {
       endTime: endTime,
       online: online,
       roomCode: roomCode,
+      group: group,
     ));
   }
 }

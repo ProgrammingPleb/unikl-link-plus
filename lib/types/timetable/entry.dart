@@ -45,6 +45,7 @@ class TimetableDayEntry {
   final String endTime;
   final bool online;
   final String roomCode;
+  final String group;
 
   TimetableDayEntry({
     required this.dayIndex,
@@ -54,6 +55,7 @@ class TimetableDayEntry {
     required this.endTime,
     required this.online,
     required this.roomCode,
+    required this.group,
   });
 
   @override
