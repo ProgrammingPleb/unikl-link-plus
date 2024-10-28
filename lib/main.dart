@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:new_unikl_link/components/debug_banner.dart';
 import 'package:new_unikl_link/pages/attendance/history.dart';
-import 'package:new_unikl_link/pages/debug/info.dart';
+import 'package:new_unikl_link/pages/debug/page.dart';
 import 'package:new_unikl_link/pages/home.dart';
 import 'package:new_unikl_link/pages/more.dart';
 import 'package:new_unikl_link/pages/settings.dart';
@@ -226,6 +225,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   child: MoreActionsPage(
                     sharedPrefs: widget.sharedPrefs,
                     settingsData: settingsData,
+                    studentData: studentData,
                     onLogout: () {
                       pageIndex = 0;
                       pages = [
@@ -254,11 +254,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                       ];
                       hasLoggedOut = false;
                     },
-                    onSettingsUpdate: (data) => setState(() {
-                      settingsData = data;
-                      pages[0] = SizedBox();
-                      pages[1] = SizedBox();
-                    }),
+                    onSettingsUpdate: (data) {
+                      setState(() {
+                        settingsData = data;
+                        pages[0] = SizedBox();
+                        pages[1] = SizedBox();
+                      });
+                    },
                   ),
                 );
                 break;

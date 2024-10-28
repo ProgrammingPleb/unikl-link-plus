@@ -1,5 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:new_unikl_link/components/menu_entry.dart';
+import 'package:new_unikl_link/pages/debug/page.dart';
 import 'package:new_unikl_link/pages/login.dart';
 import 'package:new_unikl_link/pages/settings.dart';
 import 'package:new_unikl_link/types/info/student_profile.dart';
@@ -9,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class MoreActionsPage extends StatelessWidget {
   final Future<SharedPreferences> sharedPrefs;
   final SettingsData settingsData;
+  final StudentData studentData;
   final void Function() onLogout;
   final void Function() onLogin;
   final void Function(SettingsData data) onSettingsUpdate;
@@ -17,10 +21,33 @@ class MoreActionsPage extends StatelessWidget {
     super.key,
     required this.sharedPrefs,
     required this.settingsData,
+    required this.studentData,
     required this.onLogout,
     required this.onLogin,
     required this.onSettingsUpdate,
   });
+
+  List<Widget> debugButton(
+      {required Widget seperator, required BuildContext context}) {
+    if (settingsData.debugMode || kDebugMode) {
+      return [
+        seperator,
+        MenuEntry(
+          icon: Symbols.experiment,
+          label: "Debug Info",
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => DebugInfoPage(
+                sharedPrefs: sharedPrefs,
+                studentData: studentData,
+              ),
+            ),
+          ),
+        )
+      ];
+    }
+    return [];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +68,7 @@ class MoreActionsPage extends StatelessWidget {
             ),
           ),
         ),
+        ...debugButton(seperator: SizedBox(height: 8), context: context),
         SizedBox(height: 8),
         MenuEntry(
           icon: Icons.exit_to_app,

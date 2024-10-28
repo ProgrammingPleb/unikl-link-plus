@@ -59,19 +59,19 @@ class _SettingsPageState extends State<SettingsPage> {
                         child: tokenRefreshHours(context),
                       ), */
                       Column(
-                          children: [
-                            Text(
-                              "Looking for \"Data Refresh Frequency\"?",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
+                        children: [
+                          Text(
+                            "Looking for \"Data Refresh Frequency\"?",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
                             ),
-                            Text(
-                              "This feature will return in a future release. "
-                              "Stay tuned!",
-                            ),
-                          ],
-                        ),
+                          ),
+                          Text(
+                            "This feature will return in a future release. "
+                            "Stay tuned!",
+                          ),
+                        ],
+                      ),
                       SizedBox(height: 30),
                       fastingTimetable(context),
                       SizedBox(height: 30),
@@ -87,61 +87,55 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  List<Widget> enableDebug(BuildContext context) {
-    if (!widget.settingsData.debugPermissible) {
-      return [];
-    }
-
-    return [
-      Padding(
-        padding: const EdgeInsets.only(bottom: 30),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SizedBox(
-              width: MediaQuery.of(context).size.width / 1.5,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 2),
-                    child: Text(
-                      "Enable Debug Tests",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
+  Widget enableDebug(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 30),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          SizedBox(
+            width: MediaQuery.of(context).size.width / 1.5,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 2),
+                  child: Text(
+                    "Enable Debug Mode",
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Text(
-                    "Enables a testing page for debugging UI issues.",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                ),
+                Text(
+                  "Enables a testing page for debugging purposes.",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                  Text(
-                    "Not needed if the UI is working properly.",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                ),
+                Text(
+                  "Enable this if you know what you are doing.",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Switch(
-              thumbIcon: switchIcons,
-              value: widget.settingsData.debugMode,
-              onChanged: kDebugMode
-                  ? null
-                  : (value) {
-                      setState(() {
-                        widget.settingsData.debugMode = value;
-                      });
-                    },
-            ),
-          ],
-        ),
+          ),
+          Switch(
+            thumbIcon: switchIcons,
+            value: kDebugMode ? true : widget.settingsData.debugMode,
+            onChanged: kDebugMode
+                ? null
+                : (value) {
+                    setState(() {
+                      widget.settingsData.debugMode = value;
+                    });
+                  },
+          ),
+        ],
       ),
-    ];
+    );
   }
 
   Row fastingTimetable(BuildContext context) {
