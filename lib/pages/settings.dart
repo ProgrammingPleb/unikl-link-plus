@@ -58,9 +58,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         padding: const EdgeInsets.only(bottom: 30),
                         child: tokenRefreshHours(context),
                       ), */
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 30),
-                        child: Column(
+                      Column(
                           children: [
                             Text(
                               "Looking for \"Data Refresh Frequency\"?",
@@ -74,13 +72,10 @@ class _SettingsPageState extends State<SettingsPage> {
                             ),
                           ],
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 30),
-                        child: fastingTimetable(context),
-                      ),
-                      ...enableDebug(context),
-                      //resetCache(context),
+                      SizedBox(height: 30),
+                      fastingTimetable(context),
+                      SizedBox(height: 30),
+                      enableDebug(context),
                     ],
                   ),
                 ),
@@ -148,105 +143,6 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     ];
   }
-
-  /* Row resetCache(BuildContext context) {
-    Widget resetElement() {
-      if (refresh) {
-        return const Padding(
-          padding: EdgeInsets.only(right: 10),
-          child: SizedBox(
-            width: 25,
-            height: 25,
-            child: CircularProgressIndicator(
-              strokeWidth: 3,
-            ),
-          ),
-        );
-      }
-      return FilledButton.tonal(
-        onPressed: () {
-          setState(() {
-            refresh = true;
-          });
-          checkToken(storeFuture: widget.sharedPrefs, resetCache: true)
-              .then((status) {
-            if (!status.valid && context.mounted) {
-              if (status.needsRelogin) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute<StudentData>(
-                    builder: (context) => LoginPage(
-                      sharedPrefs: widget.sharedPrefs,
-                      relogin: true,
-                    ),
-                  ),
-                ).then((data) {
-                  reloadData.studentProfile = true;
-                  reloadData.studentData = data;
-                });
-              } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute<StudentData>(
-                    builder: (context) => LoginPage(
-                      sharedPrefs: widget.sharedPrefs,
-                    ),
-                  ),
-                ).then((data) {
-                  reloadData.studentProfile = true;
-                  reloadData.studentData = data;
-                });
-              }
-            }
-
-            getTimetableData(widget.sharedPrefs).then((value) {
-              setState(() {
-                refresh = false;
-              });
-            });
-          });
-        },
-        child: const Text("Reset"),
-      );
-    }
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 2),
-              child: Text(
-                refresh ? "Resetting Cache" : "Reset Cache",
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            Text(
-              refresh
-                  ? "The app will remain on this page while"
-                  : "Resets any cached data the app has.",
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            Text(
-              refresh
-                  ? "while new data is being fetched from the server."
-                  : "Only do this if there is any outdated data.",
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-        resetElement(),
-      ],
-    );
-  } */
 
   Row fastingTimetable(BuildContext context) {
     return Row(
