@@ -1,17 +1,13 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:new_unikl_link/types/settings/invalid_branch.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsData {
   late final SharedPreferences store;
-  String _appBranch = "stable";
   int _tokenRefreshHours = 24;
   bool _atAGlanceEnabled = true;
   bool _debugMode = false;
-  bool _debugPermissible = false;
   bool _fastingTimetable = false;
 
   SettingsData(Future<SharedPreferences> storeFuture) {
@@ -36,8 +32,7 @@ class SettingsData {
 
   @override
   String toString() {
-    return "App Branch: $_appBranch, "
-        "\"At A Glance\" Enabled: $_atAGlanceEnabled, "
+    return "\"At A Glance\" Enabled: $_atAGlanceEnabled, "
         "Debug Mode Enabled: $_debugMode, "
         "Token Refresh Hours: $_tokenRefreshHours, "
         "Fasting Timetable: $_fastingTimetable";
@@ -45,7 +40,6 @@ class SettingsData {
 
   String toJson() {
     return jsonEncode({
-      "appBranch": _appBranch,
       "atAGlanceEnabled": _atAGlanceEnabled,
       "debugMode": _debugMode,
       "tokenRefreshHours": _tokenRefreshHours,
@@ -62,9 +56,6 @@ class SettingsData {
       "fastingTimetable",
     ];
 
-    if (settings["appBranch"] != null) {
-      _appBranch = settings["appBranch"];
-    }
     if (settings["atAGlanceEnabled"] != null) {
       _atAGlanceEnabled = settings["atAGlanceEnabled"];
     }
@@ -75,16 +66,7 @@ class SettingsData {
       _fastingTimetable = settings["fastingTimetable"];
     }
     if (settings["debugMode"] != null) {
-      PackageInfo versionData = await PackageInfo.fromPlatform();
-      if (versionData.version.contains("-canary")) {
-        _debugMode = settings["debugMode"];
-        _debugPermissible = true;
-      } else if (settings["debugMode"]) {
-        updateSettings();
-      }
-      if (kDebugMode) {
-        _debugMode = true;
-      }
+      _debugMode = settings["debugMode"];
     }
 
     if (!listEquals(settings.keys.toList(), allSettingsKeys)) {
@@ -94,18 +76,6 @@ class SettingsData {
 
   void updateSettings() {
     store.setString("settings", toJson());
-  }
-
-  String get appBranch {
-    return _appBranch;
-  }
-
-  set appBranch(String branch) {
-    if (!["stable", "dev", "canary"].contains(branch)) {
-      throw InvalidBranchException(branch);
-    }
-    _appBranch = branch;
-    updateSettings();
   }
 
   bool get atAGlanceEnabled {
@@ -124,10 +94,6 @@ class SettingsData {
   set debugMode(bool enabled) {
     _debugMode = enabled;
     updateSettings();
-  }
-
-  bool get debugPermissible {
-    return _debugPermissible;
   }
 
   set tokenRefreshHours(int hours) {
