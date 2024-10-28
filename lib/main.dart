@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:new_unikl_link/components/debug_banner.dart';
 import 'package:new_unikl_link/pages/attendance/history.dart';
 import 'package:new_unikl_link/pages/debug/info.dart';
 import 'package:new_unikl_link/pages/home.dart';
@@ -97,12 +98,11 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   List<Widget> pages = [];
   late SettingsData settingsData;
-  List<Widget> debugBanner = [];
-  List<Widget> debugButton = [];
   final ValueNotifier<int> snackMsg = ValueNotifier(0);
   late StudentData studentData;
   int pageIndex = 0;
   bool hasLoggedOut = false;
+  bool inDebugMode = false;
 
   void processIntent(rintent.Intent? intent) {
     const appURI = "uklplus://";
@@ -142,44 +142,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     ];
     widget.sharedPrefs.then((store) {
       settingsData = SettingsData.withoutFuture(store);
+      setState(() {
+        inDebugMode = settingsData.debugMode;
+      });
     });
-    if (Platform.isAndroid) {
-      Future.delayed(const Duration(milliseconds: 1000))
-          .then((value) => updateDebugInterface());
-    }
     ReceiveIntent.getInitialIntent().then((intent) => processIntent(intent));
     ReceiveIntent.receivedIntentStream
         .listen((intent) => processIntent(intent));
     super.initState();
-  }
-
-  void updateDebugInterface() {
-    setState(() {
-      if (settingsData.debugMode || kDebugMode) {
-        debugBanner = [
-          Container(
-            decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.errorContainer),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Text(
-                  "You are currently in debug mode!",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: Theme.of(context).colorScheme.onErrorContainer),
-                ),
-              ),
-            ),
-          )
-        ];
-        debugButton = [enableDebugTests()];
-      } else {
-        debugBanner.clear();
-        debugButton.clear();
-      }
-    });
   }
 
   Widget enableDebugTests() {
@@ -212,7 +182,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ...debugBanner,
+          DebugBanner(enabled: inDebugMode),
           Expanded(
             child: IndexedStack(
               index: pageIndex,
