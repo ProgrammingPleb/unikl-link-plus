@@ -1,8 +1,5 @@
-import 'dart:convert';
-import 'package:new_unikl_link/types/debug.dart';
 import 'package:new_unikl_link/types/timetable/day.dart';
 import 'package:new_unikl_link/utils/normalize.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class TimetableData {
   List<TimetableDay> days = [];
@@ -17,13 +14,19 @@ class TimetableData {
 
     void addSubjectToDay() {
       dayData.addEntry(
+        branchCode: currentSubject.branchCode,
+        roomCode: currentSubject.roomCode,
+        dayIndex: currentSubject.dayIndex,
         subjectCode: currentSubject.subjectCode,
         subjectName: currentSubject.subjectName,
+        group: currentSubject.group,
+        type: currentSubject.type,
+        semesterCode: currentSubject.semesterCode,
+        roomDescription: currentSubject.roomDescription,
+        level: currentSubject.level,
         startTime: currentSubject.startTime,
         endTime: currentSubject.endTime,
         online: currentSubject.online,
-        roomCode: currentSubject.roomCode,
-        group: currentSubject.group,
       );
     }
 
@@ -53,8 +56,7 @@ class TimetableData {
         hasSubject = true;
       }
     } catch (e) {
-      DebugService(storeFuture: SharedPreferences.getInstance())
-          .dataError("TimetableData", jsonEncode(data));
+      print(e);
     }
     if (hasSubject) {
       addSubjectToDay();
@@ -64,21 +66,31 @@ class TimetableData {
 }
 
 class _InternalTimetableSection {
-  late final bool online;
-  late final int dayIndex;
+  final String branchCode;
   late final String roomCode;
+  late final int dayIndex;
   final String subjectCode;
   final String subjectName;
   final String group;
+  final String type;
+  final String semesterCode;
+  final String roomDescription;
+  final int? level;
   final String startTime;
   String endTime;
+  late final bool online;
 
   _InternalTimetableSection({
-    required String day,
+    required this.branchCode,
     required String roomCode,
+    required String day,
     required this.subjectCode,
     required this.subjectName,
     required this.group,
+    required this.type,
+    required this.semesterCode,
+    required this.roomDescription,
+    required this.level,
     required this.startTime,
     required this.endTime,
   }) {
@@ -93,11 +105,16 @@ class _InternalTimetableSection {
 
   factory _InternalTimetableSection.empty() {
     return _InternalTimetableSection(
-      day: "0",
+      branchCode: "00000",
       roomCode: "",
+      day: "0",
       subjectCode: "",
       subjectName: "",
       group: "",
+      type: "",
+      semesterCode: "",
+      roomDescription: "",
+      level: null,
       startTime: "",
       endTime: "",
     );
@@ -105,11 +122,16 @@ class _InternalTimetableSection {
 
   factory _InternalTimetableSection.fromMap(Map<String, dynamic> slotData) {
     return _InternalTimetableSection(
-      day: slotData['TT_DAY'],
+      branchCode: slotData['TT_BRANCH_CODE'],
       roomCode: slotData['TT_ROOM_CODE'],
+      day: slotData['TT_DAY'],
       subjectCode: slotData['TT_SUBJECT_CODE'],
       subjectName: normalizeText(slotData['SM_DESC']),
       group: slotData['TT_GROUP'],
+      type: slotData['TT_TYPE'],
+      semesterCode: slotData['TT_SEMESTER_CODE'],
+      roomDescription: slotData['RM_ROOM_DESC'],
+      level: slotData['RM_LEVEL'],
       startTime: slotData['START_TIME'],
       endTime: slotData['END_TIME'],
     );

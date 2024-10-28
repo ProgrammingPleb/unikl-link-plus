@@ -38,36 +38,68 @@ final Map<String, String> _fastingSlotsMapFriday = {
 final DateFormat timeFormat = DateFormat("hh:mm a");
 
 class TimetableDayEntry {
+  final String branchCode;
+  final String roomCode;
   final int dayIndex;
   final String subjectCode;
   final String subjectName;
+  final String group;
+  final String type;
+  final String semesterCode;
+  final String roomDescription;
+  final int? level;
   final String startTime;
   final String endTime;
   final bool online;
-  final String roomCode;
-  final String group;
 
   TimetableDayEntry({
+    required this.branchCode,
+    required this.roomCode,
     required this.dayIndex,
     required this.subjectCode,
     required this.subjectName,
+    required this.group,
+    required this.type,
+    required this.semesterCode,
+    required this.roomDescription,
+    required this.level,
     required this.startTime,
     required this.endTime,
     required this.online,
-    required this.roomCode,
-    required this.group,
   });
 
   @override
   String toString() {
+    return "Branch Code: $branchCode\n"
+        "Room Code: $roomCode\n"
+        "Day Index: $dayIndex\n"
+        "Subject Code: $subjectCode\n"
+        "Subject Name: $subjectName\n"
+        "Subject Group: $group\n"
+        "Class Type: $type\n"
+        "Semester Code: $semesterCode\n"
+        "Room Description: $roomDescription\n"
+        "Level: ${level ?? "None"}\n"
+        "Start Time: $startTime\n"
+        "End Time: $endTime\n"
+        "Online Mode: ${online ? "Yes" : "No"}";
+  }
+
+  String toJSON() {
     return jsonEncode({
+      "branchCode": branchCode,
+      "roomCode": roomCode,
       "dayIndex": dayIndex,
       "subjectCode": subjectCode,
       "subjectName": subjectName,
+      "group": group,
+      "type": type,
+      "semesterCode": semesterCode,
+      "roomDescription": roomDescription,
+      "level": level,
       "startTime": startTime,
       "endTime": endTime,
       "online": online,
-      "roomCode": roomCode,
     });
   }
 
