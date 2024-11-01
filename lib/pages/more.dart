@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:new_unikl_link/components/app_details.dart';
 import 'package:new_unikl_link/components/menu_entry.dart';
 import 'package:new_unikl_link/pages/debug/page.dart';
 import 'package:new_unikl_link/pages/login.dart';
@@ -54,6 +55,8 @@ class MoreActionsPage extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.max,
       children: [
+        AppDetails(),
+        SizedBox(height: 16),
         MenuEntry(
           icon: Icons.settings,
           label: "Settings",
