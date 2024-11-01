@@ -1,16 +1,12 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:new_unikl_link/pages/attendance/self_attendance.dart';
-import 'package:new_unikl_link/server/query.dart';
-import 'package:new_unikl_link/server/urls.dart';
-import 'package:new_unikl_link/types/attendance/data.dart';
-import 'package:new_unikl_link/types/info/student_profile.dart';
-import 'package:new_unikl_link/types/info/student_semester.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:new_unikl_link/components/attendance_entry.dart';
-import 'package:new_unikl_link/types/attendance/entry.dart';
+import 'package:new_unikl_link/pages/attendance/self_attendance.dart';
+import 'package:new_unikl_link/types/attendance/data.dart';
+import 'package:new_unikl_link/types/attendance/subject.dart';
+import 'package:new_unikl_link/types/info/student_profile.dart';
+import 'package:new_unikl_link/utils/get_attendance_data.dart';
+import 'package:new_unikl_link/utils/normalize.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AttendanceHistoryPage extends StatefulWidget {
   final Future<SharedPreferences> sharedPrefs;
@@ -33,57 +29,30 @@ class _AttendanceHistory extends State<AttendanceHistoryPage>
   // ignore: prefer_final_fields
   List<Widget> _tabViews = [];
   late final TabController _tabController;
-  final ECitieURLs _eCitieURLs = ECitieURLs();
-  final ECitieQuery _eCitieQuery = ECitieQuery();
   bool _dataLoaded = false;
   bool refreshing = true;
 
   @override
   void initState() {
-    getAttendanceData();
+    initData();
     super.initState();
   }
 
-  Future<void> getAttendanceData({bool refresh = false}) async {
+  Future<void> initData({bool refresh = false}) async {
     setState(() {
       refreshing = true;
     });
-    SharedPreferences store = await widget.sharedPrefs;
-    http.Response serverResp = await _eCitieURLs.sendQuery(
-        widget.sharedPrefs,
-        _eCitieQuery.buildQuery(
-            store.getString("eCitieToken")!,
-            _eCitieQuery.semesterData.replaceAll(
-              "|STUDENTID|",
-              store.getString("personID")!,
-            )));
-    StudentSemesterData semesterData =
-        StudentSemesterData(jsonDecode(serverResp.body));
-    serverResp = await _eCitieURLs.sendQuery(
-        widget.sharedPrefs,
-        _eCitieQuery.buildQuery(
-            store.getString("eCitieToken")!,
-            _eCitieQuery.subjects
-                .replaceFirst("|SEMCODE|", semesterData.latest.code)
-                .replaceFirst("|STUDENTID|", store.getString("personID")!)));
-    AttendanceData attendanceData = AttendanceData(jsonDecode(serverResp.body));
-    serverResp = await _eCitieURLs.sendQuery(
-        widget.sharedPrefs,
-        _eCitieQuery.buildQuery(
-            store.getString("eCitieToken")!,
-            _eCitieQuery.attendanceHistory
-                .replaceFirst("|SEMCODE|", semesterData.latest.code)
-                .replaceFirst("|STUDENTID|", store.getString("personID")!)));
-    attendanceData.addEntries(jsonDecode(serverResp.body));
+    AttendanceData attendanceData =
+        await getAttendanceData(sharedPrefs: widget.sharedPrefs);
     int pos = 0;
     if (refresh) {
       _tabs = [];
       _tabViews = [];
     }
-    for (String subject in attendanceData.subjects) {
-      _tabs.add(subject);
+    for (String subject in attendanceData.subjectNames) {
+      _tabs.add(normalizeText(subject));
       _tabViews.add(SubjectTab(
-        subject: attendanceData.entryData[pos],
+        subject: attendanceData.subjectData[pos],
         subjectName: subject,
       ));
       pos++;
@@ -119,7 +88,7 @@ class _AttendanceHistory extends State<AttendanceHistoryPage>
                   FloatingActionButton.extended(
                     onPressed: () async {
                       if (!refreshing) {
-                        getAttendanceData(refresh: true);
+                        initData(refresh: true);
                       }
                     },
                     heroTag: "RefreshAtt",
@@ -217,7 +186,7 @@ class SubjectTab extends StatelessWidget {
     required this.subjectName,
   });
 
-  final List<AttendanceEntryData> subject;
+  final AttendanceSubject subject;
   final String subjectName;
 
   @override
@@ -232,19 +201,19 @@ class SubjectTab extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.only(top: 20),
                   child: AttendanceEntry(
-                    date: subject[index].date,
-                    classType: subject[index].classType,
-                    attendStatus: subject[index].attendStatus,
+                    date: subject.entries[index].date,
+                    classType: subject.entries[index].classType,
+                    attendStatus: subject.entries[index].attendStatus,
                   ),
                 );
               } else {
                 return AttendanceEntry(
-                  date: subject[index].date,
-                  classType: subject[index].classType,
-                  attendStatus: subject[index].attendStatus,
+                  date: subject.entries[index].date,
+                  classType: subject.entries[index].classType,
+                  attendStatus: subject.entries[index].attendStatus,
                 );
               }
-            }, childCount: subject.length),
+            }, childCount: subject.entries.length),
           ),
         )
       ],
