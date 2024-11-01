@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:intl/intl.dart';
 import 'package:new_unikl_link/types/settings/data.dart';
-import 'package:new_unikl_link/types/subject.dart';
+import 'package:new_unikl_link/types/timetable/timed_subject.dart';
 import 'package:new_unikl_link/types/timetable/data.dart';
 import 'package:new_unikl_link/types/timetable/day.dart';
 import 'package:new_unikl_link/types/timetable/entry.dart';
@@ -20,7 +20,7 @@ final List<String> days = [
   "Sunday",
 ];
 
-Future<Subject> getNextOrCurrentSubject({
+Future<TimedSubject> getNextOrCurrentSubject({
   required Future<SharedPreferences> sharedPrefs,
   required SettingsData settings,
   bool nextOnly = false,
@@ -48,7 +48,7 @@ Future<Subject> getNextOrCurrentSubject({
   for (TimetableDay dayData in timetable.days) {
     if (dayData.dayName == currentDay) {
       for (TimetableDayEntry entry in dayData.entries) {
-        Subject currentSubject = Subject(
+        TimedSubject currentSubject = TimedSubject(
           name: entry.subjectName,
           code: entry.subjectCode,
           roomCode: entry.roomCode,
@@ -63,7 +63,7 @@ Future<Subject> getNextOrCurrentSubject({
       }
     } else if (dayData.dayIndex > dayIndex) {
       TimetableDayEntry firstSubjectOfDay = dayData.entries[0];
-      Subject nextSubject = Subject(
+      TimedSubject nextSubject = TimedSubject(
         name: firstSubjectOfDay.subjectName,
         code: firstSubjectOfDay.subjectCode,
         roomCode: firstSubjectOfDay.roomCode,
@@ -77,7 +77,7 @@ Future<Subject> getNextOrCurrentSubject({
     }
   }
   TimetableDayEntry firstSubjectOfWeek = timetable.days[0].entries[0];
-  Subject currentSubject = Subject(
+  TimedSubject currentSubject = TimedSubject(
     name: firstSubjectOfWeek.subjectName,
     code: firstSubjectOfWeek.subjectCode,
     roomCode: firstSubjectOfWeek.roomCode,

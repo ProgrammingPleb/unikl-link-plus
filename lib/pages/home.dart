@@ -9,7 +9,7 @@ import 'package:new_unikl_link/components/info_entry.dart';
 import 'package:new_unikl_link/pages/login.dart';
 import 'package:new_unikl_link/types/info/student_profile.dart';
 import 'package:new_unikl_link/types/settings/data.dart';
-import 'package:new_unikl_link/types/subject.dart';
+import 'package:new_unikl_link/types/timetable/timed_subject.dart';
 import 'package:new_unikl_link/utils/get_next_or_current_subject.dart';
 import 'package:new_unikl_link/utils/normalize.dart';
 import 'package:new_unikl_link/utils/token_tools.dart';
@@ -36,8 +36,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   String name = "Placeholder Name";
   String id = "Placeholder ID";
   String date = "12:00am (Thursday, 1 January)";
-  Subject nextorCurrentSubject = Subject.empty();
-  Subject? nextSubject;
+  TimedSubject nextorCurrentSubject = TimedSubject.empty();
+  TimedSubject? nextSubject;
   bool loaded = false;
   late StudentData studentData;
   late SettingsData settingsData;
@@ -110,11 +110,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<void> updateNextClass() async {
-    Subject nextorCurrentSubject = await getNextOrCurrentSubject(
+    TimedSubject nextorCurrentSubject = await getNextOrCurrentSubject(
       sharedPrefs: widget.sharedPrefs,
       settings: settingsData,
     );
-    Subject? nextSubject;
+    TimedSubject? nextSubject;
     if (nextorCurrentSubject.isOngoing()) {
       nextSubject = await getNextOrCurrentSubject(
         sharedPrefs: widget.sharedPrefs,
@@ -276,7 +276,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 }
 
 class SubjectEntry extends StatelessWidget {
-  final Subject subject;
+  final TimedSubject subject;
   final IconData icon;
 
   const SubjectEntry({
