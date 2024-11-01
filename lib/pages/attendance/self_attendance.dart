@@ -101,7 +101,7 @@ class _SelfAttendancePageState extends State<SelfAttendancePage> {
                             )))
                     .then((value) {
                   if (context.mounted) {
-                    Navigator.of(context).pop();
+                    Navigator.of(context).pop(true);
                   }
                 });
               }

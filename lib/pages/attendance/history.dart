@@ -97,8 +97,8 @@ class _AttendanceHistory extends State<AttendanceHistoryPage>
                   ),
                   SizedBox(height: 8),
                   FloatingActionButton.extended(
-                    onPressed: () {
-                      Navigator.of(context).push(
+                    onPressed: () async {
+                      bool? result = await Navigator.of(context).push<bool>(
                         MaterialPageRoute(
                           builder: (context) => SelfAttendancePage(
                             studentData: widget.studentData,
@@ -106,6 +106,9 @@ class _AttendanceHistory extends State<AttendanceHistoryPage>
                           ),
                         ),
                       );
+                      if (result != null && result && !refreshing) {
+                        initData(refresh: true);
+                      }
                     },
                     heroTag: "SelfAtt",
                     label: Text("Self Attendance"),
