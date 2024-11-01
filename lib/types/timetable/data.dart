@@ -46,6 +46,7 @@ class TimetableData {
           hasSubject = false;
         }
         if (slot.subjectCode != currentSubject.subjectCode ||
+            slot.type != currentSubject.type ||
             slot.startTime != currentSubject.endTime) {
           if (currentSubject.subjectCode != "") {
             addSubjectToDay();
