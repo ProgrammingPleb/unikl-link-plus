@@ -1,2 +1,0 @@
-C:/Users/Pleb/Documents/unikl-link-plus/android/app/.cxx/Debug/4o3j236d/armeabi-v7a/CMakeFiles/edit_cache.dir
-C:/Users/Pleb/Documents/unikl-link-plus/android/app/.cxx/Debug/4o3j236d/armeabi-v7a/CMakeFiles/rebuild_cache.dir
