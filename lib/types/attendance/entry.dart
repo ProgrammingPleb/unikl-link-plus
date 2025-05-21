@@ -52,7 +52,7 @@ class ECitieAttendanceEntryData {
       date: date,
       startTime: startDate,
       endTime: endDate,
-      status: data["SAD_ATTEND_STS"],
+      status: data["SAD_ATTEND_STS"] ?? "",
     );
   }
 }

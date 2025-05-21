@@ -140,8 +140,7 @@ class _LoginPageState extends State<LoginPage> {
                                 widget.sharedPrefs,
                                 eCitieQ.buildQuery(
                                     auth.eCitieToken,
-                                    eCitieQ.studentProfile.replaceFirst(
-                                        "|STAFFEMAIL|",
+                                    eCitieQ.studentProfile(
                                         usernameController.text)));
                             List rawResp = jsonDecode(resp.body);
                             StudentData studentData =

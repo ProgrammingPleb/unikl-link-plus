@@ -39,26 +39,24 @@ Future<TimetableData> getTimetableData(
       sharedPrefs,
       eCitieQ.buildQuery(
           store.getString("eCitieToken")!,
-          eCitieQ.timetable
-              .replaceFirst("|STUDENTID|", store.getString("personID")!)
-              .replaceFirst("|SEMCODE|", semesterData.latest.code)
-              .replaceFirst("|BRANCHCODE|", studentData.branchCode)
-              .replaceFirst(
-                  "|WEEK|",
-                  currentWeek.number
-                      .toString()
-                      .replaceAll("|SEMSET|", semesterData.latest.set))));
+          eCitieQ.timetable(
+              studentData.branchCode,
+              semesterData.latest.code,
+              semesterData.latest.set,
+              currentWeek.number,
+              store.getString("personID")!)));
   TimetableData timetableData = TimetableData(jsonDecode(resp.body));
   if (timetableData.days[0].entries.isEmpty) {
     resp = await eCitieURL.sendQuery(
         sharedPrefs,
         eCitieQ.buildQuery(
-            store.getString("eCitieToken")!,
-            eCitieQ.timetable
-                .replaceFirst("|STUDENTID|", store.getString("personID")!)
-                .replaceFirst("|SEMCODE|", semesterData.latest.code)
-                .replaceFirst("|BRANCHCODE|", studentData.branchCode)
-                .replaceFirst("|WEEK|", "1")));
+          store.getString("eCitieToken")!,
+          eCitieQ.timetable(
+              studentData.branchCode,
+              semesterData.latest.code,
+              semesterData.latest.set,
+              1,
+              store.getString("personID")!)));
     timetableData = TimetableData(jsonDecode(resp.body));
     store.setString("timetable", resp.body);
     store.setBool("semBreak", currentWeek.type == "Semester Break");
