@@ -294,11 +294,14 @@ class SubjectEntry extends StatelessWidget {
       ),
       label: subject.isOngoing() ? "Current Class" : "Next Class",
       data: [
-        Text(
-          subject.name,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+        SizedBox(
+          width: MediaQuery.sizeOf(context).width - 80,
+          child: Text(
+            subject.name,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         Row(
