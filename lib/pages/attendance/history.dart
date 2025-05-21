@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:new_unikl_link/components/attendance_entry.dart';
 import 'package:new_unikl_link/pages/attendance/self_attendance.dart';
 import 'package:new_unikl_link/types/attendance/data.dart';
@@ -31,6 +32,7 @@ class _AttendanceHistory extends State<AttendanceHistoryPage>
   late final TabController _tabController;
   bool _dataLoaded = false;
   bool refreshing = true;
+  bool buttonVisible = true;
 
   @override
   void initState() {
@@ -54,6 +56,9 @@ class _AttendanceHistory extends State<AttendanceHistoryPage>
       _tabViews.add(SubjectTab(
         subject: attendanceData.subjectData[pos],
         subjectName: subject,
+        onScrolledDown: (buttonVisible) => setState(() {
+          this.buttonVisible = buttonVisible;
+        }),
       ));
       pos++;
     }
@@ -77,45 +82,49 @@ class _AttendanceHistory extends State<AttendanceHistoryPage>
                 tabViews: _tabViews,
               )
             : const UnloadedBody(),
-        Align(
-          alignment: Alignment.bottomRight,
-          child: Padding(
-              padding: const EdgeInsets.only(right: 20, bottom: 20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  FloatingActionButton.extended(
-                    onPressed: () async {
-                      if (!refreshing) {
-                        initData(refresh: true);
-                      }
-                    },
-                    heroTag: "RefreshAtt",
-                    label: Text("Refresh"),
-                    icon: getRefreshIcon(refreshing),
-                  ),
-                  SizedBox(height: 8),
-                  FloatingActionButton.extended(
-                    onPressed: () async {
-                      bool? result = await Navigator.of(context).push<bool>(
-                        MaterialPageRoute(
-                          builder: (context) => SelfAttendancePage(
-                            studentData: widget.studentData,
-                            storeFuture: widget.sharedPrefs,
+        AnimatedOpacity(
+          opacity: buttonVisible ? 1 : 0,
+          duration: Duration(milliseconds: 200),
+          child: Align(
+            alignment: Alignment.bottomRight,
+            child: Padding(
+                padding: const EdgeInsets.only(right: 20, bottom: 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    FloatingActionButton.extended(
+                      onPressed: () async {
+                        if (!refreshing) {
+                          initData(refresh: true);
+                        }
+                      },
+                      heroTag: "RefreshAtt",
+                      label: Text("Refresh"),
+                      icon: getRefreshIcon(refreshing),
+                    ),
+                    SizedBox(height: 8),
+                    FloatingActionButton.extended(
+                      onPressed: () async {
+                        bool? result = await Navigator.of(context).push<bool>(
+                          MaterialPageRoute(
+                            builder: (context) => SelfAttendancePage(
+                              studentData: widget.studentData,
+                              storeFuture: widget.sharedPrefs,
+                            ),
                           ),
-                        ),
-                      );
-                      if (result != null && result && !refreshing) {
-                        initData(refresh: true);
-                      }
-                    },
-                    heroTag: "SelfAtt",
-                    label: Text("Self Attendance"),
-                    icon: Icon(Icons.qr_code),
-                  ),
-                ],
-              )),
+                        );
+                        if (result != null && result && !refreshing) {
+                          initData(refresh: true);
+                        }
+                      },
+                      heroTag: "SelfAtt",
+                      label: Text("Self Attendance"),
+                      icon: Icon(Icons.qr_code),
+                    ),
+                  ],
+                )),
+          ),
         ),
       ],
     );
@@ -182,19 +191,56 @@ class LoadedBody extends StatelessWidget {
   }
 }
 
-class SubjectTab extends StatelessWidget {
+class SubjectTab extends StatefulWidget {
+  final AttendanceSubject subject;
+  final String subjectName;
+  final void Function(bool buttonVisible) onScrolledDown;
+
   const SubjectTab({
     super.key,
     required this.subject,
     required this.subjectName,
+    required this.onScrolledDown,
   });
 
-  final AttendanceSubject subject;
-  final String subjectName;
+  @override
+  State<SubjectTab> createState() => _SubjectTabState();
+}
+
+class _SubjectTabState extends State<SubjectTab> {
+  ScrollController scrollController = ScrollController();
+  bool buttonVisible = true;
+
+  @override
+  void initState() {
+    scrollController.addListener(() {
+      if (scrollController.position.userScrollDirection ==
+          ScrollDirection.reverse) {
+        if (buttonVisible == true) {
+          widget.onScrolledDown(false);
+          setState(() {
+            buttonVisible = false;
+          });
+        }
+      } else {
+        if (scrollController.position.userScrollDirection ==
+            ScrollDirection.forward) {
+          if (buttonVisible == false) {
+            widget.onScrolledDown(true);
+            setState(() {
+              buttonVisible = true;
+            });
+          }
+        }
+      }
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
+      controller: scrollController,
       slivers: [
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -204,19 +250,19 @@ class SubjectTab extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.only(top: 20),
                   child: AttendanceEntry(
-                    date: subject.entries[index].date,
-                    classType: subject.entries[index].classType,
-                    attendStatus: subject.entries[index].attendStatus,
+                    date: widget.subject.entries[index].date,
+                    classType: widget.subject.entries[index].classType,
+                    attendStatus: widget.subject.entries[index].attendStatus,
                   ),
                 );
               } else {
                 return AttendanceEntry(
-                  date: subject.entries[index].date,
-                  classType: subject.entries[index].classType,
-                  attendStatus: subject.entries[index].attendStatus,
+                  date: widget.subject.entries[index].date,
+                  classType: widget.subject.entries[index].classType,
+                  attendStatus: widget.subject.entries[index].attendStatus,
                 );
               }
-            }, childCount: subject.entries.length),
+            }, childCount: widget.subject.entries.length),
           ),
         )
       ],
